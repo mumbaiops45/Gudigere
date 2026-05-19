@@ -1,71 +1,66 @@
-type Props = {
-  product: any;
-};
+import { ShoppingCart, Zap } from "lucide-react";
+
+type Props = { product: any };
 
 export default function ProductCard({ product }: Props) {
-  return (
-    <div className="bg-white rounded-2xl shadow-md hover:shadow-2xl hover:-translate-y-2 transition duration-300 overflow-hidden border border-gray-100 h-full flex flex-col">
+  const discount = Math.round(((product.price + 500 - product.price) / (product.price + 500)) * 100);
 
-      {/* PRODUCT IMAGE */}
-      <div className="relative bg-[#f8f8f8] p-4 flex items-center justify-center h-65 overflow-hidden">
+  return (
+    <div className="bg-white border border-gray-200 hover:shadow-lg transition-all duration-300 flex flex-col h-full group">
+
+      {/* IMAGE */}
+      <div className="relative bg-gray-50 h-44 sm:h-52 flex items-center justify-center p-4 overflow-hidden">
         <img
           src={product.image}
           alt={product.title}
-          className="h-full object-contain hover:scale-110 transition duration-400"
+          className="h-full object-contain group-hover:scale-105 transition-transform duration-500"
         />
-
-        {/* DISCOUNT RIBBON */}
-        <div className="absolute top-3 left-3 bg-linear-to-r from-orange-500 to-amber-500 text-white text-xs font-extrabold px-3 py-1 rounded-full shadow-md">
-          SALE
+        <div className="absolute top-2 left-2 bg-pink-600 text-white text-[9px] sm:text-[10px] font-black px-2 py-0.5 rounded">
+          {discount}% off
         </div>
       </div>
 
-      {/* PRODUCT DETAILS */}
-      <div className="p-5 flex flex-col flex-1">
+      {/* DETAILS */}
+      <div className="p-3 sm:p-3.5 flex flex-col flex-1">
 
-        {/* TITLE */}
-        <h2 className="text-base font-bold text-gray-800 line-clamp-2 min-h-12">
+        <p className="text-[10px] sm:text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">
+          {product.vendor}
+        </p>
+
+        <h2 className="text-xs sm:text-sm text-gray-800 line-clamp-2 leading-snug min-h-8 sm:min-h-10">
           {product.title}
         </h2>
 
-        {/* VENDOR */}
-        <p className="text-sm text-gray-500 mt-2">
-          by{" "}
-          <span className="font-semibold text-pink-600">
-            {product.vendor}
-          </span>
-        </p>
-
         {/* RATING */}
-        <div className="flex items-center mt-3">
-          <div className="flex text-amber-400 text-base tracking-tight">
-            ★★★★☆
-          </div>
-          <span className="text-sm text-gray-400 ml-2">(245)</span>
+        <div className="flex items-center gap-1.5 mt-2">
+          <span className="inline-flex items-center gap-0.5 bg-green-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+            4.5 ★
+          </span>
+          <span className="text-[10px] text-gray-400">(245)</span>
         </div>
 
         {/* PRICE */}
-        <div className="mt-4 flex items-end gap-2">
-          <p className="text-2xl font-extrabold text-gray-900">
-            ₹{product.price}
-          </p>
-          <p className="text-gray-400 line-through text-sm mb-0.5">
-            ₹{product.price + 500}
-          </p>
-          <span className="text-xs font-bold text-green-600 mb-0.5">
-            25% off
-          </span>
+        <div className="flex items-baseline gap-1.5 mt-2">
+          <span className="text-base sm:text-lg font-black text-gray-900">₹{product.price}</span>
+          <span className="text-[10px] sm:text-xs text-gray-400 line-through">₹{product.price + 500}</span>
+          <span className="text-[10px] sm:text-xs text-green-600 font-bold">{discount}% off</span>
         </div>
 
-        {/* DELIVERY */}
-        <p className="text-xs text-green-600 mt-1.5 font-semibold">
-          ✓ FREE Delivery Tomorrow
+        <p className="text-[10px] sm:text-[11px] text-green-600 font-semibold mt-0.5">
+          FREE Delivery Tomorrow
         </p>
 
-        {/* BUTTON */}
-        <button className="btn-shine w-full mt-auto pt-5 bg-amber-400 hover:bg-amber-500 text-black py-3 rounded-full font-extrabold text-sm transition-all shadow-md hover:shadow-amber-400/40 hover:scale-[1.02] active:scale-95">
-          Add to Cart
-        </button>
+        {/* BUTTONS */}
+        <div className="flex gap-2 mt-auto pt-3">
+          <button className="btn-shine flex-1 bg-yellow-400 hover:bg-black hover:text-white text-gray-900 py-2 sm:py-2.5 rounded font-bold text-[10px] sm:text-xs transition-colors flex items-center justify-center gap-1">
+            <ShoppingCart size={11} />
+            Add to Cart
+          </button>
+          <button className="btn-shine flex-1 bg-pink-600 hover:bg-black text-white py-2 sm:py-2.5 rounded font-bold text-[10px] sm:text-xs transition-colors flex items-center justify-center gap-1">
+            <Zap size={11} />
+            Buy Now
+          </button>
+        </div>
       </div>
     </div>
   );

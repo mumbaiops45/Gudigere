@@ -1,121 +1,97 @@
 import { Star } from "lucide-react";
 
+const reviews = [
+  {
+    id: 1,
+    name: "Aarav Sharma",
+    avatar: "https://randomuser.me/api/portraits/men/32.jpg",
+    rating: 5,
+    title: "Excellent quality, super fast delivery!",
+    tag: "Remote Control Car",
+    text: "My son absolutely loves it. Well packaged and super fast delivery. Totally worth every rupee — best purchase this year!",
+    date: "2 days ago",
+  },
+  {
+    id: 2,
+    name: "Priya Verma",
+    avatar: "https://randomuser.me/api/portraits/women/44.jpg",
+    rating: 5,
+    title: "My daughter was absolutely thrilled!",
+    tag: "Teddy Bear",
+    text: "The teddy bear was so soft and beautifully packed. Best toy collection online. Will definitely order again from Gudigere.",
+    date: "1 week ago",
+  },
+  {
+    id: 3,
+    name: "Rohan Patel",
+    avatar: "https://randomuser.me/api/portraits/men/75.jpg",
+    rating: 4,
+    title: "Great prices, awesome packaging",
+    tag: "LEGO Set",
+    text: "Kids loved the LEGO set. Great prices and fast shipping. One small piece was missing but customer support resolved it quickly.",
+    date: "2 weeks ago",
+  },
+];
+
 export default function Reviews() {
-  const reviews = [
-    {
-      id: 1,
-      name: "Aarav Sharma",
-      image:
-        "https://randomuser.me/api/portraits/men/32.jpg",
-      rating: 5,
-      review:
-        "Amazing toy quality! My son absolutely loves the remote control car. Delivery was super fast too.",
-    },
-
-    {
-      id: 2,
-      name: "Priya Verma",
-      image:
-        "https://randomuser.me/api/portraits/women/44.jpg",
-      rating: 5,
-      review:
-        "Gudigere has the best toy collection online. The teddy bear was soft and premium quality.",
-    },
-
-    {
-      id: 3,
-      name: "Rohan Patel",
-      image:
-        "https://randomuser.me/api/portraits/men/75.jpg",
-      rating: 4,
-      review:
-        "Great prices and awesome packaging. Kids loved the LEGO set and educational toys.",
-    },
-  ];
-
   return (
-    <div className="max-w-375 mx-auto px-6 lg:px-10 py-16">
+    <section className="section-card px-4 sm:px-6 lg:px-8 py-5 sm:py-7">
 
       {/* HEADER */}
-      <div className="text-center mb-14">
-
-        <p className="uppercase tracking-[4px] text-pink-500 font-semibold">
-          Customer Reviews
-        </p>
-
-        <h1 className="text-5xl font-extrabold text-gray-800 mt-4">
-          What Parents Say
-        </h1>
-
-        <p className="text-gray-500 mt-5 max-w-2xl mx-auto text-lg">
-          Thousands of happy parents trust Gudigere
-          for quality toys, amazing offers, and fast
-          delivery.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3">
+        <h2 className="text-lg sm:text-xl font-black text-gray-900">Customer Reviews</h2>
+        <div className="flex items-center gap-2 bg-yellow-50 border border-yellow-100 px-4 py-2 rounded-full w-fit">
+          <span className="text-yellow-400 text-sm">★★★★★</span>
+          <span className="text-sm font-bold text-gray-700">4.9 / 5</span>
+          <span className="text-xs text-gray-400 hidden sm:inline">· 12,000+ reviews</span>
+        </div>
       </div>
 
-      {/* REVIEWS GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-
-        {reviews.map((review) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+        {reviews.map((r) => (
           <div
-            key={review.id}
-            className="bg-white rounded-3xl p-8 shadow-md hover:shadow-2xl hover:-translate-y-2 transition duration-300 border border-gray-100"
+            key={r.id}
+            className="border border-gray-200 rounded-lg p-4 sm:p-5 flex flex-col hover:border-pink-200 hover:shadow-sm transition-all"
           >
-
-            {/* PROFILE */}
-            <div className="flex items-center gap-4">
-
-              <img
-                src={review.image}
-                alt={review.name}
-                className="w-16 h-16 rounded-full object-cover border-4 border-pink-100"
-              />
-
-              <div>
-                <h2 className="text-xl font-bold text-gray-800">
-                  {review.name}
-                </h2>
-
-                <p className="text-gray-500 text-sm">
-                  Verified Customer
-                </p>
-              </div>
+            {/* Stars */}
+            <div className="flex items-center gap-0.5 mb-2">
+              {[...Array(5)].map((_, i) => (
+                <Star
+                  key={i}
+                  size={13}
+                  fill={i < r.rating ? "#f59e0b" : "none"}
+                  className={i < r.rating ? "text-amber-400" : "text-gray-200"}
+                />
+              ))}
+              <span className="ml-1 text-[10px] text-gray-400">{r.date}</span>
             </div>
 
-            {/* STARS */}
-            <div className="flex items-center gap-1 mt-6 text-yellow-400">
+            {/* Title */}
+            <h3 className="text-sm font-bold text-gray-900 mb-1.5">{r.title}</h3>
 
-              {[...Array(review.rating)].map(
-                (_, index) => (
-                  <Star
-                    key={index}
-                    fill="currentColor"
-                    size={22}
-                  />
-                )
-              )}
-            </div>
-
-            {/* REVIEW TEXT */}
-            <p className="text-gray-600 leading-relaxed mt-6 text-lg">
-              "{review.review}"
+            {/* Text */}
+            <p className="text-gray-500 text-xs sm:text-sm leading-relaxed flex-1">
+              {r.text}
             </p>
 
-            {/* BOTTOM */}
-            <div className="mt-8 flex items-center justify-between">
-
-              <span className="text-sm text-gray-400">
-                Purchased from Gudigere
+            {/* Tag */}
+            <div className="mt-3 mb-3">
+              <span className="bg-gray-100 text-gray-500 text-[10px] font-semibold px-2.5 py-1 rounded-full">
+                Bought: {r.tag}
               </span>
+            </div>
 
-              <button className="text-cyan-700 hover:underline font-semibold">
-                Read More
-              </button>
+            {/* Reviewer */}
+            <div className="border-t border-gray-100 pt-3 flex items-center gap-2.5">
+              <img src={r.avatar} alt={r.name} className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover border border-gray-100" />
+              <div>
+                <p className="text-xs sm:text-sm font-bold text-gray-800">{r.name}</p>
+                <p className="text-[10px] text-green-600 font-semibold">✓ Verified Purchase</p>
+              </div>
             </div>
           </div>
         ))}
       </div>
-    </div>
+    </section>
   );
 }

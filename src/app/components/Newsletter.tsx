@@ -1,65 +1,56 @@
 export default function Newsletter() {
   return (
-    <div className="max-w-375 mx-auto px-6 lg:px-10 py-16">
+    <section className="section-card px-4 sm:px-6 lg:px-8 py-5 sm:py-7">
 
-      {/* MAIN CONTAINER */}
-      <div className="relative overflow-hidden rounded-[40px] bg-linear-to-r from-pink-500 via-purple-500 to-indigo-500 shadow-2xl">
+      <div className="flex flex-col lg:flex-row items-center gap-6 lg:gap-12">
 
-        {/* BACKGROUND CIRCLES */}
-        <div className="absolute top-0 left-0 w-72 h-72 bg-white/10 rounded-full blur-3xl -translate-x-20 -translate-y-20" />
-
-        <div className="absolute bottom-0 right-0 w-72 h-72 bg-yellow-300/20 rounded-full blur-3xl translate-x-20 translate-y-20" />
-
-        {/* CONTENT */}
-        <div className="relative z-10 px-8 py-16 lg:px-20 flex flex-col lg:flex-row items-center justify-between gap-10">
-
-          {/* LEFT CONTENT */}
-          <div className="max-w-2xl text-white">
-
-            <p className="uppercase tracking-[4px] text-pink-200 font-semibold">
-              Stay Updated
-            </p>
-
-            <h1 className="text-5xl font-extrabold mt-4 leading-tight">
-              Get Amazing Toy Deals & Offers
-            </h1>
-
-            <p className="mt-6 text-lg text-gray-200 leading-relaxed">
-              Subscribe to our newsletter and receive
-              exclusive discounts, latest toy launches,
-              festival sales, and special offers directly
-              in your inbox.
-            </p>
+        {/* LEFT */}
+        <div className="flex-1 text-center lg:text-left">
+          <div className="inline-flex items-center gap-2 bg-pink-50 text-pink-600 text-[10px] font-black px-3 py-1 rounded-full mb-3 tracking-widest uppercase">
+            ✉️ Newsletter
           </div>
+          <h2 className="text-2xl sm:text-3xl font-black text-gray-900 leading-tight">
+            Exclusive Toy Deals<br />
+            <span className="text-pink-600">Every Week</span>
+          </h2>
+          <p className="mt-3 text-gray-500 text-sm leading-relaxed max-w-sm mx-auto lg:mx-0">
+            Join 10,000+ parents getting the best toy deals and new arrivals straight to their inbox.
+          </p>
+          <div className="flex flex-wrap gap-2 mt-4 justify-center lg:justify-start">
+            {["Weekly Deals", "Festival Offers", "New Arrivals", "No Spam"].map((t) => (
+              <span key={t} className="text-[11px] font-semibold bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
+                ✓ {t}
+              </span>
+            ))}
+          </div>
+        </div>
 
-          {/* RIGHT FORM */}
-          <div className="w-full max-w-xl">
+        {/* RIGHT FORM */}
+        <div className="w-full max-w-sm sm:max-w-md lg:shrink-0">
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-5 sm:p-6">
+            <h3 className="text-base font-black text-gray-900 mb-0.5">Subscribe Free 🎁</h3>
+            <p className="text-xs text-gray-400 mb-4">Get 10% off your first order</p>
 
-            <div className="bg-white rounded-3xl p-4 shadow-2xl">
-
-              {/* INPUT */}
-              <div className="flex flex-col sm:flex-row gap-4">
-
-                <input
-                  type="email"
-                  placeholder="Enter your email address"
-                  className="flex-1 border border-gray-200 rounded-full px-6 py-4 outline-none focus:border-pink-500 text-gray-700"
-                />
-
-                <button className="bg-yellow-400 hover:bg-yellow-500 transition px-8 py-4 rounded-full font-bold text-black shadow-lg">
-                  Subscribe
-                </button>
-              </div>
-
-              {/* SMALL TEXT */}
-              <p className="text-gray-500 text-sm mt-4 text-center">
-                No spam. Only exciting toy deals &
-                updates.
-              </p>
+            <div className="flex flex-col gap-3">
+              <input
+                type="text"
+                placeholder="Your name"
+                className="w-full border border-gray-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-100 rounded px-4 py-2.5 text-sm text-gray-700 outline-none transition-all bg-white"
+              />
+              <input
+                type="email"
+                placeholder="Your email address"
+                className="w-full border border-gray-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-100 rounded px-4 py-2.5 text-sm text-gray-700 outline-none transition-all bg-white"
+              />
+              <button className="btn-shine w-full bg-pink-600 hover:bg-black text-white py-2.5 sm:py-3 rounded font-bold text-sm transition-colors">
+                Subscribe & Get 10% Off →
+              </button>
             </div>
+
+            <p className="text-center text-xs text-gray-400 mt-3">No spam ever. Unsubscribe anytime.</p>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

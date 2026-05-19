@@ -3,7 +3,6 @@ import Hero from "./components/Hero";
 import ProductCard from "./components/ProductCard";
 import Footer from "./components/Footer";
 import ScrollReveal from "./components/ScrollReveal";
-
 import products from "./data/products";
 import Categories from "./components/Category";
 import DealsSection from "./components/DealsSection";
@@ -15,87 +14,42 @@ import Reviews from "./components/Reviews";
 
 export default function Home() {
   return (
-    <div className="bg-[#fffbf4] min-h-screen">
+    <div className="bg-[#f1f3f6] min-h-screen">
 
-      {/* NAVBAR */}
       <Navbar />
-
-      {/* Activates scroll-reveal for [data-reveal] and .stagger-grid */}
       <ScrollReveal />
-
-      {/* HERO */}
       <Hero />
 
-      {/* PRODUCTS SECTION */}
-      <div className="max-w-375 mx-auto px-6 lg:px-10 pt-20 pb-16">
+      <main className="max-w-375 mx-auto px-2 sm:px-3 py-3 space-y-3">
 
-        {/* SECTION HEADER */}
-        <div className="flex items-center justify-between mb-10" data-reveal>
-          <div>
-            <h2 className="text-4xl font-extrabold text-gray-800">
-              Trending Toys
-            </h2>
-            <div className="accent-line" />
+        {/* TRENDING TOYS */}
+        <section className="section-card px-4 sm:px-6 lg:px-8 py-5 sm:py-7" data-reveal>
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-xl font-black text-gray-900">Trending Toys</h2>
+            <button className="text-xs sm:text-sm font-semibold text-pink-600 hover:text-pink-700 transition-colors">
+              See All →
+            </button>
           </div>
-          <button className="text-amber-600 hover:text-amber-700 font-bold flex items-center gap-1 group transition-colors">
-            See All Deals
-            <span className="group-hover:translate-x-1 transition-transform inline-block">→</span>
-          </button>
-        </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+            {products.map((product, index) => (
+              <div key={product.id} data-reveal data-delay={String(Math.min(index + 1, 8))}>
+                <ProductCard product={product} />
+              </div>
+            ))}
+          </div>
+        </section>
 
-        {/* PRODUCTS GRID — each card revealed with staggered delay */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {products.map((product, index) => (
-            <div
-              key={product.id}
-              data-reveal
-              data-delay={String(Math.min(index + 1, 8))}
-            >
-              <ProductCard product={product} />
-            </div>
-          ))}
-        </div>
+        <div data-reveal><Categories /></div>
+        <div data-reveal><DealsSection /></div>
+        <div data-reveal><BestSellers /></div>
+        <div data-reveal><ShopByAge /></div>
+        <div data-reveal><TopBrands /></div>
+        <div data-reveal><Newsletter /></div>
+        <div data-reveal><Reviews /></div>
 
-        {/* CATEGORIES */}
-        <div data-reveal>
-          <Categories />
-        </div>
+      </main>
 
-        {/* DEALS */}
-        <div data-reveal>
-          <DealsSection />
-        </div>
-
-        {/* BEST SELLERS */}
-        <div data-reveal>
-          <BestSellers />
-        </div>
-
-        {/* SHOP BY AGE */}
-        <div data-reveal>
-          <ShopByAge />
-        </div>
-
-        {/* TOP BRANDS */}
-        <div data-reveal>
-          <TopBrands />
-        </div>
-
-        {/* NEWSLETTER */}
-        <div data-reveal>
-          <Newsletter />
-        </div>
-
-        {/* REVIEWS */}
-        <div data-reveal>
-          <Reviews />
-        </div>
-
-      </div>
-
-      {/* FOOTER */}
       <Footer />
-
     </div>
   );
 }

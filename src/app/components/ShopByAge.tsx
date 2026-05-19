@@ -1,107 +1,45 @@
+const ageGroups = [
+  { age: "0–2 Yrs",  tag: "Baby",     emoji: "👶", image: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=800", accent: "bg-pink-50 border-pink-200 hover:border-pink-400" },
+  { age: "3–5 Yrs",  tag: "Toddler",  emoji: "🧒", image: "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?q=80&w=800", accent: "bg-amber-50 border-amber-200 hover:border-amber-400" },
+  { age: "6–8 Yrs",  tag: "Junior",   emoji: "🎒", image: "https://images.unsplash.com/photo-1516627145497-ae6968895b74?q=80&w=800", accent: "bg-cyan-50 border-cyan-200 hover:border-cyan-400" },
+  { age: "9–12 Yrs", tag: "Explorer", emoji: "🔭", image: "https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=800", accent: "bg-violet-50 border-violet-200 hover:border-violet-400" },
+  { age: "Teen+",    tag: "Teen",     emoji: "🎮", image: "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800", accent: "bg-fuchsia-50 border-fuchsia-200 hover:border-fuchsia-400" },
+];
+
 export default function ShopByAge() {
-  const ageGroups = [
-    {
-      age: "0 - 2 Years",
-      image:
-        "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=1200",
-      color:
-        "from-pink-400 to-rose-500",
-    },
-
-    {
-      age: "3 - 5 Years",
-      image:
-        "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?q=80&w=1200",
-      color:
-        "from-yellow-400 to-orange-500",
-    },
-
-    {
-      age: "6 - 8 Years",
-      image:
-        "https://images.unsplash.com/photo-1516627145497-ae6968895b74?q=80&w=1200",
-      color:
-        "from-cyan-400 to-blue-500",
-    },
-
-    {
-      age: "9 - 12 Years",
-      image:
-        "https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1200",
-      color:
-        "from-purple-400 to-indigo-500",
-    },
-
-    {
-      age: "Teen Collection",
-      image:
-        "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1200",
-      color:
-        "from-green-400 to-emerald-500",
-    },
-  ];
-
   return (
-    <div className="max-w-375 mx-auto px-6 lg:px-10 py-14">
+    <section className="section-card px-4 sm:px-6 lg:px-8 py-5 sm:py-7">
 
-      {/* HEADER */}
-      <div className="flex items-center justify-between mb-10">
-
-        <div>
-          <h1 className="text-4xl font-extrabold text-gray-800">
-            Shop by Age
-          </h1>
-
-          <p className="text-gray-500 mt-2">
-            Find the perfect toys for every age
-          </p>
-        </div>
-
-        <button className="text-cyan-700 hover:underline font-semibold">
-          View All
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <h2 className="text-lg sm:text-xl font-black text-gray-900">Shop by Age</h2>
+        <button className="text-xs sm:text-sm font-semibold text-pink-600 hover:text-pink-700 transition-colors">
+          View all →
         </button>
       </div>
 
-      {/* AGE GRID */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-
-        {ageGroups.map((group, index) => (
-          <div
-            key={index}
-            className={`relative rounded-3xl overflow-hidden shadow-xl hover:-translate-y-3 hover:shadow-2xl transition duration-300 cursor-pointer bg-linear-to-br ${group.color}`}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+        {ageGroups.map((g, i) => (
+          <button
+            key={i}
+            className={`${g.accent} border-2 rounded-lg overflow-hidden group cursor-pointer hover:shadow-md transition-all duration-300 text-left`}
           >
-
-            {/* IMAGE */}
-            <div className="h-105 overflow-hidden">
-
+            <div className="h-32 sm:h-40 lg:h-44 overflow-hidden">
               <img
-                src={group.image}
-                alt={group.age}
-                className="w-full h-full object-cover hover:scale-110 transition duration-700"
+                src={g.image}
+                alt={g.age}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
             </div>
-
-            {/* OVERLAY */}
-            <div className="absolute inset-0 bg-black/30" />
-
-            {/* CONTENT */}
-            <div className="absolute bottom-0 left-0 w-full p-6 text-white">
-
-              <h2 className="text-3xl font-extrabold leading-tight">
-                {group.age}
-              </h2>
-
-              <p className="mt-3 text-sm text-gray-200">
-                Explore fun & learning toys
+            <div className="p-3 sm:p-3.5">
+              <p className="text-[10px] text-gray-400 font-semibold">{g.tag}</p>
+              <p className="text-sm sm:text-base font-black text-gray-900 leading-tight">{g.emoji} {g.age}</p>
+              <p className="mt-1.5 text-[10px] sm:text-xs font-bold text-pink-600 group-hover:text-pink-700">
+                Shop Now →
               </p>
-
-              <button className="mt-5 bg-white text-black hover:bg-yellow-400 transition px-6 py-3 rounded-full font-bold shadow-lg">
-                Shop Now
-              </button>
             </div>
-          </div>
+          </button>
         ))}
       </div>
-    </div>
+    </section>
   );
 }
