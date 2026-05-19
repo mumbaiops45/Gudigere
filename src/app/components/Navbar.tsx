@@ -324,7 +324,7 @@ export default function Navbar() {
         </nav>
 
         {/* BRAND IMAGES */}
-        <div className="bg-white border-b border-gray-100">
+        {/* <div className="bg-white border-b border-gray-100">
 
           <div className="max-w-7xl mx-auto px-4 py-3 flex gap-4 overflow-x-auto no-scrollbar">
 
@@ -355,7 +355,7 @@ export default function Navbar() {
             ))}
 
           </div>
-        </div>
+        </div> */}
 
       </header>
 

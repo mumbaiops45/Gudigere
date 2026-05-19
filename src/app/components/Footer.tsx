@@ -2,24 +2,24 @@ import { FaFacebookF, FaInstagram, FaTwitter, FaYoutube, FaWhatsapp } from "reac
 import { MapPin, Phone, Mail, Shield, Truck, RotateCcw, BadgeCheck, Smartphone } from "lucide-react";
 
 const links = {
-  Shop:    ["Remote Cars", "Teddy Bears", "LEGO Sets", "Educational Toys", "Action Figures", "Board Games"],
+  Shop: ["Remote Cars", "Teddy Bears", "LEGO Sets", "Educational Toys", "Action Figures", "Board Games"],
   Company: ["About Us", "Careers", "Vendor Partner", "Press", "Blog"],
   Support: ["Help Center", "Easy Returns", "Shipping Info", "Privacy Policy", "Terms & Conditions"],
 };
 
 const trust = [
-  { icon: Shield,      label: "100% Secure",   sub: "Safe payments"     },
-  { icon: Truck,       label: "Free Delivery",  sub: "Orders above ₹499" },
-  { icon: RotateCcw,   label: "Easy Returns",   sub: "7-day return policy"},
-  { icon: BadgeCheck,  label: "Genuine Toys",   sub: "Certified brands"  },
+  { icon: Shield, label: "100% Secure", sub: "Safe payments" },
+  { icon: Truck, label: "Free Delivery", sub: "Orders above ₹499" },
+  { icon: RotateCcw, label: "Easy Returns", sub: "7-day return policy" },
+  { icon: BadgeCheck, label: "Genuine Toys", sub: "Certified brands" },
 ];
 
 const social = [
-  { Icon: FaFacebookF, color: "hover:bg-blue-600",  label: "Facebook"  },
-  { Icon: FaInstagram, color: "hover:bg-pink-600",   label: "Instagram" },
-  { Icon: FaTwitter,   color: "hover:bg-sky-500",    label: "Twitter"   },
-  { Icon: FaYoutube,   color: "hover:bg-red-600",    label: "YouTube"   },
-  { Icon: FaWhatsapp,  color: "hover:bg-green-600",  label: "WhatsApp"  },
+  { Icon: FaFacebookF, color: "hover:bg-blue-600", label: "Facebook" },
+  { Icon: FaInstagram, color: "hover:bg-pink-600", label: "Instagram" },
+  { Icon: FaTwitter, color: "hover:bg-sky-500", label: "Twitter" },
+  { Icon: FaYoutube, color: "hover:bg-red-600", label: "YouTube" },
+  { Icon: FaWhatsapp, color: "hover:bg-green-600", label: "WhatsApp" },
 ];
 
 const payments = ["Visa", "Mastercard", "UPI", "Paytm", "PhonePe", "GPay", "Net Banking", "COD"];
@@ -74,8 +74,8 @@ export default function Footer() {
             <div className="mt-5 space-y-2.5">
               {[
                 { icon: MapPin, text: "Mumbai, Maharashtra, India" },
-                { icon: Phone,  text: "+91 98765 43210" },
-                { icon: Mail,   text: "hello@gudigere.in" },
+                { icon: Phone, text: "+91 98765 43210" },
+                { icon: Mail, text: "hello@gudigere.in" },
               ].map(({ icon: Icon, text }) => (
                 <div key={text} className="flex items-center gap-2.5 group cursor-pointer">
                   <div className="w-7 h-7 rounded-lg bg-white/8 border border-white/8 flex items-center justify-center shrink-0 group-hover:bg-pink-600/25 group-hover:border-pink-500/30 transition-all">
@@ -182,8 +182,19 @@ export default function Footer() {
       {/* ── BOTTOM BAR ── */}
       <div className="border-t border-white/8 bg-black/40">
         <div className="max-w-375 mx-auto px-4 sm:px-6 lg:px-10 py-4 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p className="text-xs text-gray-500 text-center sm:text-left">
-            © 2026 <span className="text-pink-500 font-semibold">Gudigere</span> Pvt. Ltd. All rights reserved. 🇮🇳
+          <p className="text-xs text-gray-500 text-center leading-relaxed flex items-center justify-center gap-72 flex-wrap">
+            <span>
+              © 2026 <span className="text-pink-500 font-semibold">Gudigere</span> Pvt. Ltd. All rights reserved. 🇮🇳
+            </span>
+
+            {/* <span className="text-gray-600">•</span> */}
+
+            <span>
+              Designed & Developed by{" "}
+              <span className="text-pink-400 font-semibold hover:text-pink-300 transition-colors cursor-pointer">
+                Nakshatra Namaha Creations
+              </span>
+            </span>
           </p>
           <div className="flex flex-wrap justify-center gap-4 sm:gap-5">
             {["Privacy Policy", "Terms", "Cookies", "Sitemap"].map((item) => (
