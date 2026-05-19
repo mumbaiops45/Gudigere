@@ -182,20 +182,20 @@ export default function Footer() {
       {/* ── BOTTOM BAR ── */}
       <div className="border-t border-white/8 bg-black/40">
         <div className="max-w-375 mx-auto px-4 sm:px-6 lg:px-10 py-4 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p className="text-xs text-gray-500 text-center leading-relaxed flex items-center justify-center gap-72 flex-wrap">
-            <span>
-              © 2026 <span className="text-pink-500 font-semibold">Gudigere</span> Pvt. Ltd. All rights reserved. 🇮🇳
-            </span>
+         {/* <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-2"> */}
+  
+  <p className="text-xs text-gray-500 text-left">
+    © 2026 <span className="text-pink-500 font-semibold">Gudigere</span> Pvt. Ltd. All rights reserved. 🇮🇳
+  </p>
 
-            {/* <span className="text-gray-600">•</span> */}
+  <p className="text-xs text-gray-500 text-center">
+    Designed & Developed by{" "}
+    <span className="text-pink-400 font-semibold hover:text-pink-300 transition-colors cursor-pointer">
+      Nakshatra Namaha Creations
+    </span>
+  </p>
 
-            <span>
-              Designed & Developed by{" "}
-              <span className="text-pink-400 font-semibold hover:text-pink-300 transition-colors cursor-pointer">
-                Nakshatra Namaha Creations
-              </span>
-            </span>
-          </p>
+{/* </div> */}
           <div className="flex flex-wrap justify-center gap-4 sm:gap-5">
             {["Privacy Policy", "Terms", "Cookies", "Sitemap"].map((item) => (
               <a key={item} href="#" className="text-xs text-gray-500 hover:text-pink-400 transition-colors">
