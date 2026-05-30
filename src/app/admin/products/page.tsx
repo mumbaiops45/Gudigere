@@ -60,15 +60,15 @@ export default function ProductsPage() {
   const filteredProducts =
     Array.isArray(products)
       ? products.filter(
-          (
-            product: Product
-          ) =>
-            product.name
-              .toLowerCase()
-              .includes(
-                search.toLowerCase()
-              )
-        )
+        (
+          product: Product
+        ) =>
+          product.name
+            .toLowerCase()
+            .includes(
+              search.toLowerCase()
+            )
+      )
       : [];
 
   return (
@@ -205,13 +205,17 @@ export default function ProductsPage() {
                   {/* CATEGORY */}
                   <td className="px-6 py-4 text-gray-500">
 
-                    {
+                    {/* {
                       product
                         .category
                         ?.name ||
                       "N/A"
+                    } */}
+                    {
+                      typeof product.category === "string"
+                        ? product.category
+                        : product.category?.name || "N/A"
                     }
-
                   </td>
 
                   {/* VENDOR */}
@@ -240,7 +244,7 @@ export default function ProductsPage() {
                   <td className="px-6 py-4">
 
                     {product.stock >
-                    0 ? (
+                      0 ? (
                       <span className="bg-green-100 text-green-600 px-4 py-2 rounded-full text-sm font-semibold">
 
                         In Stock
