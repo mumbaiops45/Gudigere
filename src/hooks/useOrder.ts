@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useState } from "react";
 
 import {
-  getOrders,
+  getMyOrders,
   Order,
 } from "../services/orderService";
 
@@ -22,7 +22,7 @@ export default function useOrder() {
     async () => {
       try {
         const data =
-          await getOrders();
+          await getMyOrders();
 
         setOrders(data);
 
