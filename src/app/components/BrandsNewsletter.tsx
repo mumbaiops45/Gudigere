@@ -12,37 +12,37 @@ const brands = [
   {
     id: 1,
     name: "LEGO",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/LEGO_logo.svg/200px-LEGO_logo.svg.png",
+    logo: "/logo1.png",
     url: "/brands/lego",
   },
   {
     id: 2,
     name: "Hot Wheels",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Hot_Wheels_logo.svg/200px-Hot_Wheels_logo.svg.png",
+    logo: "/logo2.png",
     url: "/brands/hot-wheels",
   },
   {
     id: 3,
     name: "Barbie",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Barbie_Logo.svg/200px-Barbie_Logo.svg.png",
+    logo: "/logo3.png",
     url: "/brands/barbie",
   },
   {
     id: 4,
     name: "Fisher-Price",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Fisher-Price_logo.svg/200px-Fisher-Price_logo.svg.png",
+    logo: "/logo4.png",
     url: "/brands/fisher-price",
   },
   {
     id: 5,
     name: "Nerf",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Nerf_logo.svg/200px-Nerf_logo.svg.png",
+    logo: "/logo5.png",
     url: "/brands/nerf",
   },
   {
     id: 6,
     name: "Hasbro",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Hasbro_logo.svg/200px-Hasbro_logo.svg.png",
+    logo: "/logo6.png",
     url: "/brands/hasbro",
   },
 ];
@@ -190,6 +190,7 @@ export default function BrandsNewsletter() {
                       src={brand.logo}
                       alt={brand.name}
                       fill
+                      sizes="128px"
                       className="object-contain"
                     />
                   </div>

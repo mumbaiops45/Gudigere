@@ -164,6 +164,7 @@ export default function DealOfTheDay() {
                 src={deal.images[0]}
                 alt={deal.name}
                 fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover group-hover:scale-105 transition duration-500"
               />
               {/* Discount Badge */}

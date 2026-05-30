@@ -105,7 +105,6 @@ function LocationDropdown({
 
   return (
     <div className="absolute left-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden">
-      {/* Header */}
       <div className="flex items-center justify-between px-4 pt-3.5 pb-2 border-b border-gray-100">
         <p className="text-sm font-black text-gray-900">Deliver to</p>
         <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100 transition-colors">
@@ -113,7 +112,6 @@ function LocationDropdown({
         </button>
       </div>
 
-      {/* Search input */}
       <div className="px-3 py-2.5">
         <div className="flex items-center gap-2 h-10 rounded-xl border-2 border-gray-200 focus-within:border-pink-500 transition-colors px-3 bg-gray-50">
           <Search size={14} className="text-gray-400 shrink-0" />
@@ -128,7 +126,6 @@ function LocationDropdown({
         </div>
       </div>
 
-      {/* Use current location */}
       <button
         onClick={detectLocation}
         disabled={detecting}
@@ -143,7 +140,6 @@ function LocationDropdown({
         </span>
       </button>
 
-      {/* Results */}
       {results.length > 0 && (
         <ul className="max-h-52 overflow-y-auto">
           {results.map((r) => {
@@ -207,7 +203,6 @@ export default function Navbar() {
         return;
       } catch { /* ignore */ }
     }
-    /* auto-detect */
     if (!navigator.geolocation) { setLocation(l => ({ ...l, ready: true })); return; }
     navigator.geolocation.getCurrentPosition(
       async ({ coords }) => {
@@ -250,8 +245,7 @@ export default function Navbar() {
       <header className="w-full sticky top-0 z-50 flex flex-col">
 
         {/* ── ANNOUNCEMENT BAR ── */}
-        <div className="hidden sm:flex items-center justify-center gap-2
-          bg-slate-900 text-slate-300 py-2 px-4 text-xs">
+        <div className="hidden sm:flex items-center justify-center gap-2 bg-slate-900 text-slate-300 py-2 px-4 text-xs">
           <span className="text-pink-400">🎁</span>
           <span>
             <span className="font-semibold text-white">FREE Delivery</span>
@@ -262,22 +256,19 @@ export default function Navbar() {
             {" "}for 10% extra off
           </span>
           <span className="mx-1 text-slate-700">·</span>
-          <button className="underline-offset-2 underline text-pink-400
-            hover:text-pink-300 transition-colors font-medium">
+          <button className="underline-offset-2 underline text-pink-400 hover:text-pink-300 transition-colors font-medium">
             Download App →
           </button>
         </div>
 
         {/* ── MAIN HEADER ── */}
         <div className="bg-white shadow-[0_1px_0_rgba(0,0,0,.08)]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-5 lg:px-8 h-16
-            flex items-center gap-3 sm:gap-4">
+          <div className="max-w-7xl mx-auto px-4 sm:px-5 lg:px-8 h-16 flex items-center gap-3 sm:gap-4">
 
             {/* Hamburger */}
             <button
               onClick={() => setDrawerOpen(true)}
-              className="lg:hidden p-2 -ml-1 rounded-lg
-                hover:bg-pink-50 hover:text-pink-600 transition-colors shrink-0"
+              className="lg:hidden p-2 -ml-1 rounded-lg hover:bg-pink-50 hover:text-pink-600 transition-colors shrink-0"
             >
               <Menu size={22} className="text-slate-700" />
             </button>
@@ -295,8 +286,7 @@ export default function Navbar() {
             <div ref={locationRef} className="hidden xl:block relative shrink-0">
               <button
                 onClick={() => setLocationOpen(v => !v)}
-                className="flex items-center gap-1.5 px-2 py-1.5 rounded-xl
-                  hover:bg-pink-50 transition-colors group"
+                className="flex items-center gap-1.5 px-2 py-1.5 rounded-xl hover:bg-pink-50 transition-colors group"
               >
                 <MapPin size={15} className="text-pink-500 shrink-0 group-hover:text-pink-600" />
                 <div className="leading-tight text-left">
@@ -320,14 +310,8 @@ export default function Navbar() {
             </div>
 
             {/* ── SEARCH BAR ── */}
-            <div className="hidden md:flex flex-1 h-11 rounded-xl overflow-hidden
-              border-2 border-slate-200 hover:border-pink-400
-              focus-within:border-pink-600
-              focus-within:shadow-[0_0_0_3px_rgba(219,39,119,.12)]
-              transition-all bg-white">
-              <select className="h-full px-3 bg-slate-50 border-r border-slate-200
-                text-sm text-slate-600 outline-none font-medium cursor-pointer shrink-0
-                hover:bg-pink-50 transition-colors">
+            <div className="hidden md:flex flex-1 h-11 rounded-xl overflow-hidden border-2 border-slate-200 hover:border-pink-400 focus-within:border-pink-600 focus-within:shadow-[0_0_0_3px_rgba(219,39,119,.12)] transition-all bg-white">
+              <select className="h-full px-3 bg-slate-50 border-r border-slate-200 text-sm text-slate-600 outline-none font-medium cursor-pointer shrink-0 hover:bg-pink-50 transition-colors">
                 <option>All</option>
                 <option>RC Cars</option>
                 <option>Teddy Bears</option>
@@ -338,11 +322,9 @@ export default function Navbar() {
               <input
                 type="text"
                 placeholder="Search toys, brands, age groups…"
-                className="flex-1 px-4 text-sm text-slate-700
-                  placeholder:text-slate-400 outline-none bg-white"
+                className="flex-1 px-4 text-sm text-slate-700 placeholder:text-slate-400 outline-none bg-white"
               />
-              <button className="h-full px-5 bg-pink-600 hover:bg-pink-700
-                transition-colors text-white shrink-0 flex items-center justify-center">
+              <button className="h-full px-5 bg-pink-600 hover:bg-pink-700 transition-colors text-white shrink-0 flex items-center justify-center">
                 <Search size={18} />
               </button>
             </div>
@@ -353,8 +335,7 @@ export default function Navbar() {
               {/* Mobile search */}
               <button
                 onClick={() => setSearchOpen(v => !v)}
-                className="md:hidden p-2 rounded-lg hover:bg-pink-50
-                  hover:text-pink-600 transition-colors"
+                className="md:hidden p-2 rounded-lg hover:bg-pink-50 hover:text-pink-600 transition-colors"
               >
                 <Search size={20} className="text-slate-700" />
               </button>
@@ -362,8 +343,7 @@ export default function Navbar() {
               {/* Sign In */}
               <button
                 onClick={() => router.push("/login")}
-                className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl
-                  hover:bg-pink-50 transition-colors group"
+                className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-pink-50 transition-colors group"
               >
                 <User size={18} className="text-slate-500 group-hover:text-pink-600 transition-colors" />
                 <div className="hidden lg:block leading-tight text-left">
@@ -379,8 +359,7 @@ export default function Navbar() {
               {/* Become Seller */}
               <button
                 onClick={() => router.push("/become-vendor")}
-                className="hidden lg:flex items-center gap-2 px-3 py-2 rounded-xl
-                  hover:bg-pink-50 transition-colors group"
+                className="hidden lg:flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-pink-50 transition-colors group"
               >
                 <div className="leading-tight text-left">
                   <p className="text-[10px] text-slate-400 group-hover:text-pink-400 transition-colors">
@@ -393,8 +372,7 @@ export default function Navbar() {
               </button>
 
               {/* Orders */}
-              <button className="hidden lg:flex items-center gap-2 px-3 py-2
-                rounded-xl hover:bg-pink-50 transition-colors group">
+              <button className="hidden lg:flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-pink-50 transition-colors group">
                 <Package size={18} className="text-slate-500 group-hover:text-pink-600 transition-colors" />
                 <div className="leading-tight text-left">
                   <p className="text-[10px] text-slate-400 group-hover:text-pink-400 transition-colors">
@@ -407,8 +385,7 @@ export default function Navbar() {
               </button>
 
               {/* Wishlist */}
-              <button className="hidden lg:flex items-center gap-2 px-3 py-2
-                rounded-xl hover:bg-pink-50 transition-colors group">
+              <button className="hidden lg:flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-pink-50 transition-colors group">
                 <Heart size={18} className="text-slate-500 group-hover:text-pink-600 transition-colors" />
                 <div className="leading-tight text-left">
                   <p className="text-[10px] text-slate-400 group-hover:text-pink-400 transition-colors">My</p>
@@ -421,19 +398,12 @@ export default function Navbar() {
               {/* CART */}
               <button
                 onClick={() => router.push("/cart")}
-                className="relative flex items-center gap-2 ml-2
-                  px-4 sm:px-5 py-2.5 bg-pink-600 hover:bg-pink-700
-                  transition-colors text-white rounded-xl
-                  shadow-[0_4px_14px_rgba(219,39,119,.35)]
-                  hover:shadow-[0_6px_20px_rgba(219,39,119,.45)]"
+                className="relative flex items-center gap-2 ml-2 px-4 sm:px-5 py-2.5 bg-pink-600 hover:bg-pink-700 transition-colors text-white rounded-xl shadow-[0_4px_14px_rgba(219,39,119,.35)] hover:shadow-[0_6px_20px_rgba(219,39,119,.45)]"
               >
                 <div className="relative">
                   <ShoppingCart size={19} />
                   {cartCount > 0 && (
-                    <span className="absolute -top-2.5 -right-2.5
-                      bg-amber-400 text-slate-900 text-[9px]
-                      min-w-4.5 h-4.5 rounded-full px-0.5
-                      flex items-center justify-center font-black leading-none">
+                    <span className="absolute -top-2.5 -right-2.5 bg-amber-400 text-slate-900 text-[9px] min-w-4.5 h-4.5 rounded-full px-0.5 flex items-center justify-center font-black leading-none">
                       {cartCount > 99 ? "99+" : cartCount}
                     </span>
                   )}
@@ -446,14 +416,12 @@ export default function Navbar() {
           {/* Mobile search bar */}
           {searchOpen && (
             <div className="md:hidden px-4 pb-3 border-t border-slate-100">
-              <div className="flex h-11 mt-2.5 rounded-xl overflow-hidden
-                border-2 border-pink-500 shadow-sm">
+              <div className="flex h-11 mt-2.5 rounded-xl overflow-hidden border-2 border-pink-500 shadow-sm">
                 <input
                   autoFocus
                   type="text"
                   placeholder="Search toys, games, LEGO…"
-                  className="flex-1 px-4 text-sm text-slate-700
-                    placeholder:text-slate-400 outline-none bg-white"
+                  className="flex-1 px-4 text-sm text-slate-700 placeholder:text-slate-400 outline-none bg-white"
                 />
                 <button
                   onClick={() => setSearchOpen(false)}
@@ -468,14 +436,11 @@ export default function Navbar() {
 
         {/* ── CATEGORY NAV BAR ── */}
         <nav className="bg-slate-900 shadow-sm">
-          <div className="max-w-7xl mx-auto h-10 flex items-stretch
-            overflow-x-auto no-scrollbar">
+          <div className="max-w-7xl mx-auto h-10 flex items-stretch overflow-x-auto no-scrollbar">
 
             <button
               onClick={() => setDrawerOpen(true)}
-              className="shrink-0 flex items-center gap-2 px-4 text-sm
-                font-semibold text-white hover:bg-pink-600
-                transition-colors whitespace-nowrap border-r border-white/10"
+              className="shrink-0 flex items-center gap-2 px-4 text-sm font-semibold text-white hover:bg-pink-600 transition-colors whitespace-nowrap border-r border-white/10"
             >
               <Menu size={15} />
               <span className="hidden sm:inline">All Categories</span>
@@ -485,9 +450,7 @@ export default function Navbar() {
             {navLinks.map(label => (
               <button
                 key={label}
-                className="shrink-0 px-3 sm:px-4 text-xs sm:text-sm
-                  text-slate-400 hover:text-pink-300 hover:bg-pink-600/20
-                  transition-colors whitespace-nowrap font-medium"
+                className="shrink-0 px-3 sm:px-4 text-xs sm:text-sm text-slate-400 hover:text-pink-300 hover:bg-pink-600/20 transition-colors whitespace-nowrap font-medium"
               >
                 {label}
               </button>
@@ -503,14 +466,12 @@ export default function Navbar() {
             className="absolute inset-0 bg-slate-900/70 backdrop-blur-sm"
             onClick={() => setDrawerOpen(false)}
           />
-          <div className="absolute left-0 top-0 bottom-0 w-72 sm:w-80
-            bg-white shadow-2xl flex flex-col overflow-hidden">
+          <div className="absolute left-0 top-0 bottom-0 w-72 sm:w-80 bg-white shadow-2xl flex flex-col overflow-hidden">
 
             {/* Drawer header */}
             <div className="bg-slate-900 px-5 py-4 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/10 rounded-full
-                  flex items-center justify-center border border-white/20">
+                <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center border border-white/20">
                   <User size={18} className="text-white" />
                 </div>
                 <div>
@@ -530,9 +491,7 @@ export default function Navbar() {
             <div className="px-4 py-3 bg-pink-50 border-b border-pink-100">
               <button
                 onClick={() => { router.push("/login"); setDrawerOpen(false); }}
-                className="w-full bg-pink-600 hover:bg-pink-700
-                  text-white py-2.5 rounded-xl text-sm font-semibold
-                  transition-colors"
+                className="w-full bg-pink-600 hover:bg-pink-700 text-white py-2.5 rounded-xl text-sm font-semibold transition-colors"
               >
                 Sign In / Register
               </button>
@@ -540,24 +499,19 @@ export default function Navbar() {
 
             {/* Categories */}
             <div className="flex-1 overflow-y-auto">
-              <p className="px-5 pt-4 pb-2 text-[10px] font-black
-                uppercase tracking-widest text-slate-400">
+              <p className="px-5 pt-4 pb-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
                 Shop By Category
               </p>
               {drawerCats.map(({ icon, label }) => (
                 <button
                   key={label}
-                  className="w-full flex items-center justify-between
-                    px-5 py-3 hover:bg-pink-50 transition-colors
-                    border-b border-slate-50 group text-left"
+                  className="w-full flex items-center justify-between px-5 py-3 hover:bg-pink-50 transition-colors border-b border-slate-50 group text-left"
                 >
-                  <span className="flex items-center gap-3 text-sm
-                    font-medium text-slate-700 group-hover:text-pink-700">
+                  <span className="flex items-center gap-3 text-sm font-medium text-slate-700 group-hover:text-pink-700">
                     <span className="text-xl w-7 text-center">{icon}</span>
                     {label}
                   </span>
-                  <ChevronRight size={14} className="text-slate-300
-                    group-hover:text-pink-400 transition-colors shrink-0" />
+                  <ChevronRight size={14} className="text-slate-300 group-hover:text-pink-400 transition-colors shrink-0" />
                 </button>
               ))}
             </div>

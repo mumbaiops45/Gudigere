@@ -33,7 +33,7 @@ export default function Footer() {
 
       {/* ── TRUST BADGES ── */}
       <div className="bg-white/5 border-b border-white/8">
-        <div className="max-w-375 mx-auto px-4 sm:px-6 lg:px-10 py-5 sm:py-6">
+        <div className="max-w-375 mx-auto px-6 sm:px-10 lg:px-16 py-6 sm:py-8">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:divide-x sm:divide-white/10">
             {trust.map(({ icon: Icon, label, sub }) => (
               <div key={label} className="flex items-center gap-3 sm:justify-center sm:px-4 first:pl-0 last:pr-0">
@@ -51,7 +51,7 @@ export default function Footer() {
       </div>
 
       {/* ── MAIN CONTENT ── */}
-      <div className="max-w-375 mx-auto px-4 sm:px-6 lg:px-10 pt-10 sm:pt-12 pb-8">
+      <div className="max-w-375 mx-auto px-6 sm:px-10 lg:px-16 pt-12 sm:pt-16 pb-10 sm:pb-14">
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-10">
 
           {/* BRAND COLUMN */}
@@ -181,7 +181,7 @@ export default function Footer() {
 
       {/* ── BOTTOM BAR ── */}
       <div className="border-t border-white/8 bg-black/40">
-        <div className="max-w-375 mx-auto px-4 sm:px-6 lg:px-10 py-4 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div className="max-w-375 mx-auto px-6 sm:px-10 lg:px-16 py-5 sm:py-6 flex flex-col sm:flex-row items-center justify-between gap-2">
           {/* <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-2"> */}
 
           <p className="text-xs text-gray-500 text-left">

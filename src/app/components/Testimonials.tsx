@@ -69,6 +69,7 @@ function TestimonialCard({ testimonial, index }: { testimonial: Testimonial; ind
             src={testimonial.avatar || "/avatar-placeholder.png"}
             alt={testimonial.name}
             fill
+            sizes="40px"
             className="object-cover"
           />
         </div>

@@ -85,7 +85,7 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
       <Link href={`/products/${product._id}`} className="block relative h-60 overflow-hidden bg-linear-to-br from-pink-50 to-amber-50">
         <Image
           src={image}
-          alt={product.name}
+          alt={product.name || "Product image"}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -113,12 +113,12 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
           >
             <Heart size={16} className={liked ? "fill-red-500 text-red-500" : "text-gray-500"} />
           </button>
-          <Link
-            href={`/products/${product._id}`}
+          <button
+            onClick={(e) => { e.preventDefault(); router.push(`/products/${product._id}`); }}
             className="bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-md hover:scale-110 transition-transform flex items-center justify-center"
           >
             <Eye size={16} className="text-gray-600" />
-          </Link>
+          </button>
         </div>
       </Link>
 

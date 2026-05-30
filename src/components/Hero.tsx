@@ -134,7 +134,7 @@ export default function Hero() {
             transition={{ duration: 0.9 }}
             className="absolute inset-0"
           >
-            <Image src={slides[current].image} alt="" fill priority className="object-cover" />
+            <Image src={slides[current].image} alt={slides[current].title} fill priority sizes="100vw" className="object-cover" />
           </motion.div>
         </AnimatePresence>
 
@@ -157,7 +157,7 @@ export default function Hero() {
             >
               <div className="bg-white rounded-2xl shadow-2xl p-3 w-40">
                 <div className="relative h-28 rounded-xl overflow-hidden">
-                  <Image src={slides[current].card1.img} alt="" fill className="object-cover" />
+                  <Image src={slides[current].card1.img} alt={slides[current].card1.name} fill sizes="160px" loading="eager" className="object-cover" />
                 </div>
                 <p className="font-bold text-sm mt-2.5 text-gray-900">{slides[current].card1.name}</p>
                 <p className={`text-xs font-semibold mt-0.5 ${slides[current].card1.badgeColor}`}>{slides[current].card1.badge}</p>
@@ -181,7 +181,7 @@ export default function Hero() {
             >
               <div className="bg-white rounded-2xl shadow-2xl p-3 w-40">
                 <div className="relative h-28 rounded-xl overflow-hidden">
-                  <Image src={slides[current].card2.img} alt="" fill className="object-cover" />
+                  <Image src={slides[current].card2.img} alt={slides[current].card2.name} fill sizes="160px" loading="eager" className="object-cover" />
                 </div>
                 <p className="font-bold text-sm mt-2.5 text-gray-900">{slides[current].card2.name}</p>
                 <p className={`text-xs font-semibold mt-0.5 ${slides[current].card2.badgeColor}`}>{slides[current].card2.badge}</p>

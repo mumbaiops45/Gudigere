@@ -131,6 +131,7 @@ function ProductCard({
           src={product.image}
           alt={product.name}
           fill
+          sizes="(max-width: 640px) 192px, 208px"
           className="object-cover transition-transform duration-500
             group-hover:scale-110"
         />
