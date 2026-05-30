@@ -1,131 +1,364 @@
 @import "tailwindcss";
 @import "@fontsource/plus-jakarta-sans";
 
-/* ===== KEYFRAMES ===== */
-@keyframes fadeUp   { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
-@keyframes slideRight { from{opacity:0;transform:translateX(-32px)} to{opacity:1;transform:translateX(0)} }
-@keyframes float    { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
-@keyframes floatSlow{ 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-8px) rotate(2deg)} }
-@keyframes shimmer  { 0%{transform:translateX(-150%) skewX(-20deg)} 100%{transform:translateX(350%) skewX(-20deg)} }
-@keyframes bounceBadge{ 0%,100%{transform:scale(1) rotate(-1deg)} 50%{transform:scale(1.06) rotate(1deg)} }
-@keyframes pulse    { 0%,100%{opacity:1} 50%{opacity:.6} }
-@keyframes scaleIn  { from{opacity:0;transform:scale(0.92)} to{opacity:1;transform:scale(1)} }
-
-/* ===== DESIGN TOKENS ===== */
-:root {
-  --bg:         #f1f3f6;   /* Flipkart-like page background */
-  --surface:    #ffffff;
-  --pink:       #db2777;
-  --pink-dark:  #9d174d;
-  --amber:      #f59e0b;
-  --dark-nav:   #212121;   /* Amazon/Flipkart dark nav */
-  --text:       #212121;
-  --text-muted: #6b7280;
-  --border:     #e5e7eb;
-  --green:      #388e3c;   /* Flipkart green */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   KEYFRAMES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@keyframes shimmer {
+  0%   { transform: translateX(-150%) skewX(-20deg) }
+  100% { transform: translateX(350%)  skewX(-20deg) }
+}
+@keyframes pulse-glow {
+  0%,100% { box-shadow: 0 0 0 0   rgba(233,30,140,.45) }
+  50%     { box-shadow: 0 0 0 12px rgba(233,30,140,.0)  }
+}
+@keyframes float {
+  0%,100% { transform: translateY(0)    }
+  50%     { transform: translateY(-10px) }
+}
+@keyframes marquee {
+  from { transform: translateX(0) }
+  to   { transform: translateX(-50%) }
+}
+@keyframes blob-drift {
+  0%,100% { transform: translate(0,0) scale(1) }
+  33%     { transform: translate(22px,-18px) scale(1.06) }
+  66%     { transform: translate(-14px,12px) scale(0.96) }
+}
+@keyframes badge-pop {
+  0%,100% { transform: scale(1)    }
+  50%     { transform: scale(1.07) }
+}
+@keyframes ticker-slide {
+  0%   { transform: translateX(0) }
+  100% { transform: translateX(-50%) }
+}
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(16px) }
+  to   { opacity: 1; transform: translateY(0)    }
 }
 
-/* ===== THEME ===== */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   DESIGN TOKENS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+:root {
+  /* ─ Brand ─ */
+  --pink:       #e91e8c;
+  --pink-dark:  #c2185b;
+  --pink-700:   #be185d;
+  --pink-light: #fce4f3;
+  --blue:       #1565c0;
+  --blue-light: #e3f2fd;
+  --amber:      #f59e0b;
+  --green:      #00897b;
+  --emerald:    #10b981;
+  --purple:     #7c3aed;
+
+  /* ─ Neutral ─ */
+  --dark:    #0a0a1a;
+  --dark-2:  #131326;
+  --text:    #1a1a2e;
+  --text-2:  #4a5568;
+  --muted:   #718096;
+  --border:  #e2e8f0;
+  --surface: #ffffff;
+  --bg:      #f7f8fc;
+
+  /* ─ Shadows ─ */
+  --sh-xs: 0 1px 3px  rgba(10,10,26,.06), 0 0 0 1px rgba(10,10,26,.04);
+  --sh-sm: 0 2px 8px  rgba(10,10,26,.08), 0 1px 2px rgba(10,10,26,.05);
+  --sh-md: 0 6px 20px rgba(10,10,26,.10), 0 2px 4px rgba(10,10,26,.06);
+  --sh-lg: 0 16px 40px rgba(10,10,26,.13);
+  --sh-xl: 0 28px 60px rgba(10,10,26,.18);
+
+  /* ─ Radius ─ */
+  --r-sm:  6px;
+  --r-md:  10px;
+  --r-lg:  14px;
+  --r-xl:  20px;
+  --r-2xl: 28px;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   THEME
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 @theme inline {
   --color-background: var(--bg);
   --color-foreground: var(--text);
   --font-sans: "Plus Jakarta Sans", sans-serif;
-
-  --animate-fade-up:     fadeUp     0.55s ease-out both;
-  --animate-slide-right: slideRight 0.55s ease-out both;
-  --animate-float:       float  3s ease-in-out infinite;
-  --animate-float-slow:  floatSlow 5s ease-in-out infinite;
-  --animate-badge:       bounceBadge 2.5s ease-in-out infinite;
 }
 
-/* ===== SCROLLBAR ===== */
-.no-scrollbar          { scrollbar-width:none; -ms-overflow-style:none; }
-.no-scrollbar::-webkit-scrollbar { display:none; }
-::-webkit-scrollbar    { width:5px; height:5px; }
-::-webkit-scrollbar-track { background:#f1f1f1; border-radius:10px; }
-::-webkit-scrollbar-thumb { background:linear-gradient(to bottom,#db2777,#9333ea); border-radius:10px; }
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SCROLLBAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none }
+.no-scrollbar::-webkit-scrollbar { display: none }
+::-webkit-scrollbar { width: 4px; height: 4px }
+::-webkit-scrollbar-track { background: #f1f5f9 }
+::-webkit-scrollbar-thumb { background: var(--pink); border-radius: 99px }
 
-/* ===== BASE ===== */
-* { box-sizing:border-box; }
-html { scroll-behavior:smooth; }
-::selection { background:#fce7f3; color:#9d174d; }
-body { background:var(--bg); color:var(--text); font-family:"Plus Jakarta Sans",sans-serif; -webkit-font-smoothing:antialiased; }
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   BASE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+* { box-sizing: border-box }
+html { scroll-behavior: smooth }
+::selection { background: #fce4f3; color: var(--pink-dark) }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Plus Jakarta Sans", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
-/* ===== SCROLL REVEAL ===== */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TYPOGRAPHY SYSTEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* Section heading — large display titles */
+.heading-xl {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+/* Pink accent word inside headings */
+.heading-pink {
+  color: var(--pink);
+}
+
+/* Gradient pink accent (optional richer variant) */
+.heading-pink-grad {
+  background: linear-gradient(135deg, var(--pink) 0%, #f43f5e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Section sub-label badge */
+.section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--pink-light);
+  color: var(--pink-dark);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.85rem;
+  border-radius: 99px;
+  border: 1px solid #f9a8d4;
+  margin-bottom: 0.6rem;
+}
+
+/* Consistent section padding */
+.section-py {
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+@media (min-width: 768px) {
+  .section-py { padding-top: 6rem; padding-bottom: 6rem; }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SECTION CARD  (flat Amazon/Flipkart style — full-width white panel)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.section-card {
+  background: var(--surface);
+  border-radius: var(--r-2xl);
+  box-shadow: var(--sh-md);
+  border: 1px solid var(--border);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   PRODUCT CARD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.product-card {
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--sh-xs);
+  overflow: hidden;
+  transition:
+    box-shadow .25s ease,
+    transform  .3s  cubic-bezier(.34,1.56,.64,1);
+}
+.product-card:hover {
+  box-shadow: var(--sh-lg);
+  transform: translateY(-5px);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   BUTTONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.btn-base { position: relative; overflow: hidden }
+.btn-base::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(105deg,transparent 40%,rgba(255,255,255,.4) 50%,transparent 60%);
+  transform: translateX(-150%) skewX(-20deg); pointer-events: none;
+}
+.btn-base:hover::after { animation: shimmer .45s ease-out forwards }
+
+.btn-pink  { background: var(--pink);      color: #fff; transition: background .2s }
+.btn-pink:hover  { background: var(--pink-dark) }
+
+.btn-dark  { background: var(--dark);      color: #fff; transition: background .2s }
+.btn-dark:hover  { background: var(--dark-2) }
+
+.btn-blue  { background: var(--blue);      color: #fff; transition: background .2s }
+.btn-blue:hover  { background: #0d47a1 }
+
+.btn-amber { background: var(--amber);     color: var(--dark); transition: background .2s }
+.btn-amber:hover { background: #d97706 }
+
+.btn-outline-pink {
+  background: transparent; color: var(--pink);
+  border: 2px solid var(--pink);
+  transition: background .2s, color .2s;
+}
+.btn-outline-pink:hover { background: var(--pink); color: #fff }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SECTION HEADER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.sec-header {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  margin-bottom: 1.25rem; gap: .75rem;
+}
+@media (min-width: 640px) { .sec-header { margin-bottom: 1.5rem } }
+
+.sec-header .title {
+  font-size: 1.4rem; font-weight: 800; color: var(--text);
+  line-height: 1.2; letter-spacing: -.018em;
+}
+@media (min-width: 640px)  { .sec-header .title { font-size: 1.6rem  } }
+@media (min-width: 1024px) { .sec-header .title { font-size: 1.75rem } }
+
+.sec-header .sub {
+  font-size: .8125rem; color: var(--muted); margin-top: .35rem; line-height: 1.5;
+}
+.sec-header .view-all {
+  font-size: .8125rem; font-weight: 700; color: var(--pink);
+  white-space: nowrap; flex-shrink: 0;
+  transition: color .15s, transform .15s;
+}
+.sec-header .view-all:hover { color: var(--pink-dark); transform: translateX(3px) }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SECTION BADGE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.sec-badge {
+  display: inline-flex; align-items: center; gap: .375rem;
+  background: var(--pink-light); border: 1px solid #f9a8d4;
+  color: var(--pink-dark); font-size: .6875rem; font-weight: 700;
+  letter-spacing: .07em; text-transform: uppercase;
+  padding: .3rem .75rem; border-radius: 99px; margin-bottom: .6rem;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TEXT GRADIENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.text-grad-pink {
+  background: linear-gradient(135deg, var(--pink) 0%, var(--purple) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.text-grad-warm {
+  background: linear-gradient(135deg, #fbbf24 0%, #f97316 55%, #ef4444 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.text-grad-blue {
+  background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.text-grad-rose {
+  background: linear-gradient(135deg, #f43f5e 0%, #ec4899 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.text-grad-amber {
+  background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   PROMO BADGE (hero / deal)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.toy-badge {
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(233,30,140,.4);
+  animation: badge-pop 2.5s ease-in-out infinite;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   INPUT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.form-input {
+  width: 100%; border: 1.5px solid var(--border);
+  border-radius: var(--r-md); padding: 11px 14px;
+  font-size: .875rem; color: var(--text);
+  outline: none; background: #f8fafc;
+  transition: border-color .2s, box-shadow .2s, background .2s;
+}
+.form-input:focus {
+  border-color: var(--pink);
+  box-shadow: 0 0 0 3px rgba(233,30,140,.12);
+  background: #fff;
+}
+.form-input::placeholder { color: #94a3b8 }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SCROLL REVEAL (CSS fallback — GSAP overrides)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 [data-reveal] {
-  opacity:0; transform:translateY(28px);
+  opacity: 0; transform: translateY(24px);
   transition: opacity .6s cubic-bezier(.16,1,.3,1), transform .6s cubic-bezier(.16,1,.3,1);
 }
-[data-reveal].revealed { opacity:1; transform:none; }
-[data-reveal][data-delay="1"]{transition-delay:.06s}
-[data-reveal][data-delay="2"]{transition-delay:.12s}
-[data-reveal][data-delay="3"]{transition-delay:.18s}
-[data-reveal][data-delay="4"]{transition-delay:.24s}
-[data-reveal][data-delay="5"]{transition-delay:.30s}
-[data-reveal][data-delay="6"]{transition-delay:.36s}
-[data-reveal][data-delay="7"]{transition-delay:.42s}
-[data-reveal][data-delay="8"]{transition-delay:.48s}
+[data-reveal].revealed          { opacity: 1; transform: none }
+[data-reveal][data-delay="1"]   { transition-delay: .06s }
+[data-reveal][data-delay="2"]   { transition-delay: .12s }
+[data-reveal][data-delay="3"]   { transition-delay: .18s }
+[data-reveal][data-delay="4"]   { transition-delay: .24s }
+[data-reveal][data-delay="5"]   { transition-delay: .30s }
 
-.stagger-grid > * {
-  opacity:0; transform:translateY(20px);
-  transition: opacity .45s cubic-bezier(.16,1,.3,1), transform .45s cubic-bezier(.16,1,.3,1);
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   GSAP ANIMATION TARGET CLASSES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.g-hero-word     { display: inline-block }
+.g-hero-stat     { will-change: transform, opacity }
+.g-hero-cta      { will-change: transform, opacity }
+.g-hero-showcase { will-change: transform, opacity }
+.g-hero-bg       { will-change: transform }
+.g-reveal        { will-change: transform, opacity }
+.g-card          { will-change: transform, opacity }
+.g-stagger       { will-change: transform, opacity }
+
+/* Horizontal scroll (GSAP pin) */
+.g-hscroll-section { overflow: hidden }
+.g-hscroll-track   { display: flex; will-change: transform }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   AUTH PAGE ANIMATIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@keyframes enter-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-.stagger-grid.revealed > *:nth-child(1){opacity:1;transform:none;transition-delay:.05s}
-.stagger-grid.revealed > *:nth-child(2){opacity:1;transform:none;transition-delay:.10s}
-.stagger-grid.revealed > *:nth-child(3){opacity:1;transform:none;transition-delay:.15s}
-.stagger-grid.revealed > *:nth-child(4){opacity:1;transform:none;transition-delay:.20s}
-.stagger-grid.revealed > *:nth-child(5){opacity:1;transform:none;transition-delay:.25s}
-.stagger-grid.revealed > *:nth-child(6){opacity:1;transform:none;transition-delay:.30s}
+.enter-1 { animation: enter-up 0.45s cubic-bezier(0.16,1,0.3,1) both; }
 
-/* ===== HOVER LIFT (card) ===== */
-.hover-lift { transition: transform .2s ease, box-shadow .2s ease; }
-.hover-lift:hover { transform:translateY(-3px); box-shadow:0 8px 24px rgba(0,0,0,.12); }
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MISC UTILITIES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.deco-float   { animation: float 3.5s ease-in-out infinite }
+.deco-float-2 { animation: float 4.5s ease-in-out infinite 1s }
+.blob-drift   { animation: blob-drift 8s  ease-in-out infinite }
+.blob-drift-2 { animation: blob-drift 11s ease-in-out infinite 2s }
+.pulse-glow   { animation: pulse-glow 2.2s ease-in-out infinite }
 
-/* ===== SHIMMER BUTTON ===== */
-.btn-shine { position:relative; overflow:hidden; }
-.btn-shine::after {
-  content:''; position:absolute; inset:0;
-  background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,.45) 50%,transparent 62%);
-  transform:translateX(-150%) skewX(-20deg);
-  pointer-events:none;
+.ticker-track {
+  display: flex; white-space: nowrap;
+  animation: ticker-slide 30s linear infinite;
 }
-.btn-shine:hover::after { animation:shimmer .45s ease-out forwards; }
-
-/* ===== TEXT GRADIENT ===== */
-.text-gradient-warm {
-  background:linear-gradient(135deg,#fbbf24 0%,#f97316 55%,#ef4444 100%);
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-}
-.text-gradient-pink {
-  background:linear-gradient(135deg,#db2777 0%,#9333ea 100%);
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-}
-
-/* ===== ACCENT LINE ===== */
-.accent-line {
-  height:3px; width:44px;
-  background:linear-gradient(to right,#db2777,#9333ea);
-  border-radius:2px; margin-top:8px;
-}
-
-/* ===== PROMO BADGE ===== */
-.toy-badge {
-  background:linear-gradient(135deg,#db2777,#9333ea);
-  color:#fff; box-shadow:0 4px 14px rgba(219,39,119,.4);
-  animation:bounceBadge 2.5s ease-in-out infinite;
-}
-
-/* ===== ENTRANCE ===== */
-.enter-1{animation:fadeUp    .65s ease-out both .05s}
-.enter-2{animation:fadeUp    .65s ease-out both .18s}
-.enter-3{animation:fadeUp    .65s ease-out both .31s}
-.enter-4{animation:fadeUp    .65s ease-out both .44s}
-.enter-left-1{animation:slideRight .65s ease-out both .05s}
-
-/* ===== FLOATS ===== */
-.deco-float  {animation:float     3.5s ease-in-out infinite}
-.deco-float-2{animation:float     4.5s ease-in-out infinite 1s}
-.deco-float-3{animation:floatSlow 5.5s ease-in-out infinite 2s}
-
-/* ===== SECTION CARD (white panel on gray bg) ===== */
-.section-card { background:#fff; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+.ticker-track:hover { animation-play-state: paused }

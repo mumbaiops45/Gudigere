@@ -1,44 +1,174 @@
+"use client";
+
+import { motion } from "framer-motion";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+
 const ageGroups = [
-  { age: "0–2 Yrs",  tag: "Baby",     emoji: "👶", image: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=800", accent: "bg-pink-50 border-pink-200 hover:border-pink-400" },
-  { age: "3–5 Yrs",  tag: "Toddler",  emoji: "🧒", image: "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?q=80&w=800", accent: "bg-amber-50 border-amber-200 hover:border-amber-400" },
-  { age: "6–8 Yrs",  tag: "Junior",   emoji: "🎒", image: "https://images.unsplash.com/photo-1516627145497-ae6968895b74?q=80&w=800", accent: "bg-cyan-50 border-cyan-200 hover:border-cyan-400" },
-  { age: "9–12 Yrs", tag: "Explorer", emoji: "🔭", image: "https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=800", accent: "bg-violet-50 border-violet-200 hover:border-violet-400" },
-  { age: "Teen+",    tag: "Teen",     emoji: "🎮", image: "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800", accent: "bg-fuchsia-50 border-fuchsia-200 hover:border-fuchsia-400" },
+  {
+    id: 1,
+    range: "0–2",
+    suffix: "yrs",
+    label: "Babies & Toddlers",
+    description: "Soft toys, teethers & sensory play",
+    emoji: "🧸",
+    from: "#f472b6",
+    to: "#ec4899",
+    shadow: "rgba(236,72,153,0.35)",
+    link: "/products?age=0-2",
+  },
+  {
+    id: 2,
+    range: "3–5",
+    suffix: "yrs",
+    label: "Preschoolers",
+    description: "Blocks, pretend play & puzzles",
+    emoji: "🎨",
+    from: "#60a5fa",
+    to: "#3b82f6",
+    shadow: "rgba(59,130,246,0.35)",
+    link: "/products?age=3-5",
+  },
+  {
+    id: 3,
+    range: "6–8",
+    suffix: "yrs",
+    label: "Little Explorers",
+    description: "STEM kits, board games & crafts",
+    emoji: "🔬",
+    from: "#34d399",
+    to: "#10b981",
+    shadow: "rgba(16,185,129,0.35)",
+    link: "/products?age=6-8",
+  },
+  {
+    id: 4,
+    range: "9–12",
+    suffix: "yrs",
+    label: "Young Innovators",
+    description: "Robotics, drones & strategy games",
+    emoji: "🤖",
+    from: "#a78bfa",
+    to: "#7c3aed",
+    shadow: "rgba(124,58,237,0.35)",
+    link: "/products?age=9-12",
+  },
+  {
+    id: 5,
+    range: "12+",
+    suffix: "yrs",
+    label: "Teens & Beyond",
+    description: "Advanced kits, collectibles & gadgets",
+    emoji: "🚀",
+    from: "#fbbf24",
+    to: "#f97316",
+    shadow: "rgba(249,115,22,0.35)",
+    link: "/products?age=12plus",
+  },
 ];
 
 export default function ShopByAge() {
   return (
-    <section className="section-card px-4 sm:px-6 lg:px-8 py-5 sm:py-7">
+    <section className="py-16 md:py-24 bg-gray-950 overflow-hidden relative">
 
-      <div className="flex items-center justify-between mb-4 sm:mb-6">
-        <h2 className="text-lg sm:text-xl font-black text-gray-900">Shop by Age</h2>
-        <button className="text-xs sm:text-sm font-semibold text-pink-600 hover:text-pink-700 transition-colors">
-          View all →
-        </button>
-      </div>
+      {/* Background decorative blobs */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-pink-600/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-        {ageGroups.map((g, i) => (
-          <button
-            key={i}
-            className={`${g.accent} border-2 rounded-lg overflow-hidden group cursor-pointer hover:shadow-md transition-all duration-300 text-left`}
-          >
-            <div className="h-32 sm:h-40 lg:h-44 overflow-hidden">
-              <img
-                src={g.image}
-                alt={g.age}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-            </div>
-            <div className="p-3 sm:p-3.5">
-              <p className="text-[10px] text-gray-400 font-semibold">{g.tag}</p>
-              <p className="text-sm sm:text-base font-black text-gray-900 leading-tight">{g.emoji} {g.age}</p>
-              <p className="mt-1.5 text-[10px] sm:text-xs font-bold text-pink-600 group-hover:text-pink-700">
-                Shop Now →
-              </p>
-            </div>
-          </button>
-        ))}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-14"
+        >
+          <span className="inline-flex items-center gap-2 bg-pink-600/15 border border-pink-500/25 text-pink-400 text-xs font-bold px-4 py-1.5 rounded-full mb-4">
+            🎂 Find by Age
+          </span>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white">
+            Shop by <span className="text-pink-500">Age</span>
+          </h2>
+          <p className="text-gray-400 text-base mt-3 max-w-lg mx-auto">
+            Perfect toys for every stage of childhood — from newborns to teens.
+          </p>
+        </motion.div>
+
+        {/* Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-5">
+          {ageGroups.map((group, i) => (
+            <motion.div
+              key={group.id}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.5, delay: i * 0.08, ease: "easeOut" }}
+              whileHover={{ y: -8, transition: { duration: 0.2 } }}
+            >
+              <Link href={group.link} className="block group">
+                <div
+                  className="relative rounded-3xl overflow-hidden p-6 flex flex-col items-center text-center h-full min-h-52 cursor-pointer transition-all duration-300"
+                  style={{
+                    background: `linear-gradient(145deg, ${group.from}, ${group.to})`,
+                    boxShadow: `0 8px 30px ${group.shadow}`,
+                  }}
+                >
+                  {/* Watermark age number */}
+                  <span
+                    className="absolute -bottom-3 -right-2 text-8xl font-black leading-none select-none pointer-events-none"
+                    style={{ color: "rgba(255,255,255,0.12)" }}
+                  >
+                    {group.range}
+                  </span>
+
+                  {/* Emoji */}
+                  <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-4 text-4xl group-hover:scale-110 transition-transform duration-200">
+                    {group.emoji}
+                  </div>
+
+                  {/* Age range */}
+                  <p className="text-3xl font-black text-white leading-none">
+                    {group.range}
+                    <span className="text-lg font-bold text-white/70 ml-1">{group.suffix}</span>
+                  </p>
+
+                  {/* Label */}
+                  <h3 className="text-sm font-black text-white mt-2 leading-tight">
+                    {group.label}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-xs text-white/70 mt-1.5 leading-relaxed line-clamp-2">
+                    {group.description}
+                  </p>
+
+                  {/* CTA */}
+                  <div className="mt-4 flex items-center gap-1 bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-3 py-1.5 rounded-full transition-colors duration-150 group-hover:gap-2">
+                    Shop
+                    <ArrowRight size={12} className="transition-transform duration-150 group-hover:translate-x-0.5" />
+                  </div>
+                </div>
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Bottom note */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.5 }}
+          className="text-center text-gray-500 text-sm mt-10"
+        >
+          👪 Not sure?{" "}
+          <Link href="/gift-guide" className="text-pink-400 hover:text-pink-300 transition-colors underline underline-offset-2">
+            Our Gift Guide
+          </Link>{" "}
+          helps you choose the perfect toy.
+        </motion.p>
       </div>
     </section>
   );

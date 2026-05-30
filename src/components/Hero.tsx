@@ -17,19 +17,96 @@ const quickCats = [
 
 const slides = [
   {
-    image: "https://images.unsplash.com/photo-1516627145497-ae6968895b74?q=80&w=2070",
+    image:
+      "/hero.jpg",
+
     title: "Amazing Toys",
+
     subtitle: "For Every Kid!",
+
+    card1: {
+      img:
+        "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?q=80&w=800",
+
+      name: "RC Cars Collection",
+
+      badge: "Up to 40% OFF",
+
+      badgeColor: "text-pink-600",
+    },
+
+    card2: {
+      img:
+        "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=800",
+
+      name: "Teddy Bears",
+
+      badge: "Best Seller ★",
+
+      badgeColor: "text-green-600",
+    },
   },
+
   {
-    image: "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?q=80&w=2070",
+    image:
+      "/hero2.jpg",
+
     title: "Fun Learning",
+
     subtitle: "Educational Toys",
+
+    card1: {
+      img:
+        "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=800",
+
+      name: "LEGO Sets",
+
+      badge: "New Arrivals",
+
+      badgeColor: "text-blue-600",
+    },
+
+    card2: {
+      img:
+        "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=800",
+
+      name: "Science Kits",
+
+      badge: "Top Rated ★",
+
+      badgeColor: "text-yellow-600",
+    },
   },
+
   {
-    image: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=2070",
+    image:
+      "/hero3.jpg",
+
     title: "Cute Collections",
+
     subtitle: "Soft Toys & Dolls",
+
+    card1: {
+      img:
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?q=80&w=800",
+
+      name: "Plush Toys",
+
+      badge: "Kids Favourite",
+
+      badgeColor: "text-purple-600",
+    },
+
+    card2: {
+      img:
+        "https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?q=80&w=800",
+
+      name: "Doll House",
+
+      badge: "30% OFF Today",
+
+      badgeColor: "text-pink-600",
+    },
   },
 ];
 
@@ -70,13 +147,23 @@ export default function Hero() {
           transition={{ duration: 4, repeat: Infinity }}
           className="hidden lg:block absolute top-16 right-24 z-10"
         >
-          <div className="bg-white rounded-2xl shadow-2xl p-3 w-40">
-            <div className="relative h-28 rounded-xl overflow-hidden">
-              <Image src="https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?q=80&w=800" alt="" fill className="object-cover" />
-            </div>
-            <p className="font-bold text-sm mt-2.5 text-gray-900">RC Cars Collection</p>
-            <p className="text-xs text-pink-600 font-semibold mt-0.5">Up to 40% OFF</p>
-          </div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`card1-${current}`}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="bg-white rounded-2xl shadow-2xl p-3 w-40">
+                <div className="relative h-28 rounded-xl overflow-hidden">
+                  <Image src={slides[current].card1.img} alt="" fill className="object-cover" />
+                </div>
+                <p className="font-bold text-sm mt-2.5 text-gray-900">{slides[current].card1.name}</p>
+                <p className={`text-xs font-semibold mt-0.5 ${slides[current].card1.badgeColor}`}>{slides[current].card1.badge}</p>
+              </div>
+            </motion.div>
+          </AnimatePresence>
         </motion.div>
 
         <motion.div
@@ -84,13 +171,23 @@ export default function Hero() {
           transition={{ duration: 5, repeat: Infinity }}
           className="hidden lg:block absolute bottom-20 right-56 z-10"
         >
-          <div className="bg-white rounded-2xl shadow-2xl p-3 w-40">
-            <div className="relative h-28 rounded-xl overflow-hidden">
-              <Image src="https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=800" alt="" fill className="object-cover" />
-            </div>
-            <p className="font-bold text-sm mt-2.5 text-gray-900">Teddy Bears</p>
-            <p className="text-xs text-green-600 font-semibold mt-0.5">Best Seller ★</p>
-          </div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`card2-${current}`}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+            >
+              <div className="bg-white rounded-2xl shadow-2xl p-3 w-40">
+                <div className="relative h-28 rounded-xl overflow-hidden">
+                  <Image src={slides[current].card2.img} alt="" fill className="object-cover" />
+                </div>
+                <p className="font-bold text-sm mt-2.5 text-gray-900">{slides[current].card2.name}</p>
+                <p className={`text-xs font-semibold mt-0.5 ${slides[current].card2.badgeColor}`}>{slides[current].card2.badge}</p>
+              </div>
+            </motion.div>
+          </AnimatePresence>
         </motion.div>
 
         {/* Content */}
@@ -167,33 +264,6 @@ export default function Hero() {
           ))}
         </div>
       </div>
-
-      {/* ── QUICK CATEGORY STRIP ── */}
-      <div className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-2 sm:px-4">
-
-          <div className="flex lg:justify-center overflow-x-auto no-scrollbar">
-
-            {quickCats.map((cat, i) => (
-              <motion.button
-                key={i}
-                whileHover={{ y: -2 }}
-                className="shrink-0 flex flex-col items-center gap-1.5 px-3 sm:px-5 lg:px-7 py-3 sm:py-4 hover:bg-pink-50 group transition-colors border-b-2 border-transparent hover:border-pink-500"
-              >
-                <span className="text-xl sm:text-2xl">
-                  {cat.icon}
-                </span>
-
-                <span className="text-[10px] sm:text-xs font-semibold text-gray-600 group-hover:text-pink-600 whitespace-nowrap transition-colors">
-                  {cat.label}
-                </span>
-              </motion.button>
-            ))}
-
-          </div>
-        </div>
-      </div>
-
     </div>
   );
 }

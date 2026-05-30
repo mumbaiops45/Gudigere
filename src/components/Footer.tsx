@@ -59,8 +59,8 @@ export default function Footer() {
 
             {/* Logo */}
             <a href="/" className="inline-flex items-center gap-0.5 mb-1 select-none">
-              <span className="text-3xl font-black text-pink-500 leading-none">Gudi</span>
-              <span className="text-3xl font-black text-white leading-none">gere</span>
+              <span className="text-3xl font-black text-pink-500 leading-none">Goodie</span>
+              <span className="text-3xl font-black text-white leading-none"> Gear</span>
             </a>
             <p className="text-[10px] font-black text-pink-400 uppercase tracking-widest mb-3">
               India's #1 Toy Marketplace
@@ -75,7 +75,7 @@ export default function Footer() {
               {[
                 { icon: MapPin, text: "Mumbai, Maharashtra, India" },
                 { icon: Phone, text: "+91 98765 43210" },
-                { icon: Mail, text: "hello@gudigere.in" },
+                { icon: Mail, text: "hello@goodiegear.in" },
               ].map(({ icon: Icon, text }) => (
                 <div key={text} className="flex items-center gap-2.5 group cursor-pointer">
                   <div className="w-7 h-7 rounded-lg bg-white/8 border border-white/8 flex items-center justify-center shrink-0 group-hover:bg-pink-600/25 group-hover:border-pink-500/30 transition-all">
@@ -136,7 +136,7 @@ export default function Footer() {
             </div>
 
             <div className="flex-1 text-center sm:text-left">
-              <p className="font-black text-white text-base sm:text-lg">Download the Gudigere App</p>
+              <p className="font-black text-white text-base sm:text-lg">Download the Goodie Gear App</p>
               <p className="text-gray-400 text-xs sm:text-sm mt-1">
                 App-only deals · Live order tracking · Exclusive offers every day
               </p>
@@ -182,20 +182,20 @@ export default function Footer() {
       {/* ── BOTTOM BAR ── */}
       <div className="border-t border-white/8 bg-black/40">
         <div className="max-w-375 mx-auto px-4 sm:px-6 lg:px-10 py-4 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-2">
-         {/* <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-2"> */}
-  
-  <p className="text-xs text-gray-500 text-left">
-    © 2026 <span className="text-pink-500 font-semibold">Gudigere</span> Pvt. Ltd. All rights reserved. 🇮🇳
-  </p>
+          {/* <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-2"> */}
 
-  <p className="text-xs text-gray-500 text-center">
-    Designed & Developed by{" "}
-    <span className="text-pink-400 font-semibold hover:text-pink-300 transition-colors cursor-pointer">
-      Nakshatra Namaha Creations
-    </span>
-  </p>
+          <p className="text-xs text-gray-500 text-left">
+            © 2026 <span className="text-pink-500 font-semibold">Goodie Gear</span> Pvt. Ltd. All rights reserved. 🇮🇳
+          </p>
 
-{/* </div> */}
+          <p className="text-xs text-gray-500 text-center">
+            Designed & Developed by{" "}
+            <span className="text-pink-400 font-semibold hover:text-pink-300 transition-colors cursor-pointer">
+              Nakshatra Namaha Creations
+            </span>
+          </p>
+
+          {/* </div> */}
           <div className="flex flex-wrap justify-center gap-4 sm:gap-5">
             {["Privacy Policy", "Terms", "Cookies", "Sitemap"].map((item) => (
               <a key={item} href="#" className="text-xs text-gray-500 hover:text-pink-400 transition-colors">
