@@ -7,6 +7,7 @@ import {
   MapPin, ChevronRight, Package, LocateFixed, Loader2,
 } from "lucide-react";
 import useCartStore from "../store/cartStore";
+import useWishlistStore from "../store/wishlistStore";
 
 /* ── nav links ────────────────────────────────────────────────── */
 const navLinks = [
@@ -192,6 +193,7 @@ export default function Navbar() {
   const cartCount = cartItems.reduce(
     (sum: number, item: unknown) => sum + ((item as { quantity?: number }).quantity ?? 1), 0
   );
+  const wishlistCount = useWishlistStore((s) => s.wishlistItems.length);
 
   /* load saved / detect on first mount */
   useEffect(() => {
@@ -384,10 +386,20 @@ export default function Navbar() {
                 </div>
               </button>
 
-              {/* Wishlist */}
-              <button className="hidden lg:flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-pink-50 transition-colors group">
-                <Heart size={18} className="text-slate-500 group-hover:text-pink-600 transition-colors" />
-                <div className="leading-tight text-left">
+              {/* Wishlist — visible on all screen sizes */}
+              <button
+                onClick={() => router.push("/wishlist")}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-pink-50 transition-colors group"
+              >
+                <div className="relative">
+                  <Heart size={18} className="text-slate-500 group-hover:text-pink-600 transition-colors" />
+                  {wishlistCount > 0 && (
+                    <span className="absolute -top-2.5 -right-2.5 bg-pink-500 text-white text-[9px] min-w-4.5 h-4.5 rounded-full px-0.5 flex items-center justify-center font-black leading-none">
+                      {wishlistCount > 99 ? "99+" : wishlistCount}
+                    </span>
+                  )}
+                </div>
+                <div className="hidden lg:block leading-tight text-left">
                   <p className="text-[10px] text-slate-400 group-hover:text-pink-400 transition-colors">My</p>
                   <p className="text-sm font-bold text-slate-800 group-hover:text-pink-600 transition-colors">
                     Wishlist

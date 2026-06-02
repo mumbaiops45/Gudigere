@@ -63,8 +63,9 @@ export default function useCategory() {
     setCategories,
   } = useCategoryStore();
 
+  // Only show spinner on true first-load (store is empty and not yet persisted)
   const [loading, setLoading] =
-    useState<boolean>(true);
+    useState<boolean>(categories.length === 0);
 
   // FETCH CATEGORIES
   const fetchCategories =
@@ -72,7 +73,7 @@ export default function useCategory() {
 
       try {
 
-        setLoading(true);
+        if (categories.length === 0) setLoading(true);
 
         const data:
           Category[] =

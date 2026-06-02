@@ -4,11 +4,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Eye, ShoppingCart, Check, Star } from "lucide-react";
+import { Eye, ShoppingCart, Check, Star, Heart } from "lucide-react";
 import { toast } from "sonner";
 
 import useAuthStore from "../../../store/authStore";
 import useCartStore from "../../../store/cartStore";
+import useWishlistStore from "../../../store/wishlistStore";
+import { addToWishlist, removeWishlistItem } from "../../../services/wishlistService";
 import { Product } from "../../../services/productService";
 
 interface Props {
@@ -24,11 +26,52 @@ export default function CategoryProductCard({ product, index }: Props) {
     addToCart: (product: Product & { quantity: number }) => void;
   };
 
+  const { wishlistItems, setWishlistItems } = useWishlistStore();
+
   const [added, setAdded] = useState(false);
   const [hovered, setHovered] = useState(false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
 
   const inCart = cartItems.some((item) => item._id === product._id);
   const inStock = product.stock > 0;
+  const inWishlist = wishlistItems.some((i) => i._id === product._id);
+
+  const handleWishlist = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const localToken = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    if (!token && !localToken) {
+      toast.error("Please login to save to wishlist");
+      router.push("/login");
+      return;
+    }
+
+    setWishlistLoading(true);
+    const snapshot = wishlistItems;
+
+    // Optimistic update
+    if (inWishlist) {
+      setWishlistItems(snapshot.filter((i) => i._id !== product._id));
+    } else {
+      setWishlistItems([...snapshot, product as any]);
+    }
+
+    try {
+      if (inWishlist) {
+        await removeWishlistItem(product._id);
+        toast.success("Removed from wishlist");
+      } else {
+        await addToWishlist(product._id);
+        toast.success("Added to wishlist!");
+      }
+    } catch {
+      setWishlistItems(snapshot);
+      toast.error("Something went wrong");
+    } finally {
+      setWishlistLoading(false);
+    }
+  };
 
   const handleAddToCart = () => {
     if (!token) {
@@ -88,13 +131,27 @@ export default function CategoryProductCard({ product, index }: Props) {
         )}
       </AnimatePresence>
 
-      {/* QUICK VIEW BUTTON */}
-      <div className="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-        <Link href={`/products/${product._id}`}>
-          <button className="bg-white/90 backdrop-blur-sm p-2.5 rounded-full shadow-lg hover:bg-pink-500 hover:text-white transition-colors duration-200">
-            <Eye size={16} />
-          </button>
-        </Link>
+      {/* TOP-RIGHT ACTIONS */}
+      <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
+        {/* Quick view */}
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <Link href={`/products/${product._id}`}>
+            <button className="bg-white/90 backdrop-blur-sm p-2.5 rounded-full shadow-lg hover:bg-pink-500 hover:text-white transition-colors duration-200">
+              <Eye size={16} />
+            </button>
+          </Link>
+        </div>
+        {/* Wishlist */}
+        <button
+          onClick={handleWishlist}
+          disabled={wishlistLoading}
+          className="bg-white/90 backdrop-blur-sm p-2.5 rounded-full shadow-lg transition-colors duration-200"
+        >
+          <Heart
+            size={16}
+            className={inWishlist ? "fill-pink-500 text-pink-500" : "text-gray-400 hover:text-pink-500"}
+          />
+        </button>
       </div>
 
       {/* IMAGE */}

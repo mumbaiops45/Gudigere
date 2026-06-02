@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-
+import { useRouter } from "next/navigation";
 const quickCats = [
   { icon: "🚗", label: "Remote Cars" },
   { icon: "🧸", label: "Soft Toys" },
@@ -111,6 +111,7 @@ const slides = [
 ];
 
 export default function Hero() {
+    const router = useRouter();
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
@@ -225,6 +226,7 @@ export default function Hero() {
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
+                     onClick={() => router.push("/products")}
                     className="btn-shine bg-pink-600 hover:bg-black text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-md font-bold text-sm transition-colors shadow-lg"
                   >
                     Shop Now →
@@ -232,6 +234,7 @@ export default function Hero() {
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
+                     onClick={() => router.push("/cart")}
                     className="bg-white/15 hover:bg-white/30 text-white px-5 sm:px-7 py-2.5 sm:py-3 rounded-md font-bold text-sm border border-white/35 transition-all"
                   >
                     View Deals

@@ -414,8 +414,6 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-import useCategory from "../hooks/useCategory";
-
 type Category = {
   _id: string;
 
@@ -426,25 +424,7 @@ type Category = {
   description?: string;
 };
 
-export default function CategorySection() {
-
-  const {
-    categories,
-    loading,
-  }: {
-    categories: Category[];
-    loading: boolean;
-  } = useCategory();
-
-  if (loading) {
-    return (
-      <div className="py-32 text-center text-xl font-bold">
-
-        Loading Categories...
-
-      </div>
-    );
-  }
+export default function CategorySection({ categories }: { categories: Category[] }) {
 
   return (
     <section className="py-20 bg-gray-50">

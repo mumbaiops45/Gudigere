@@ -40,10 +40,11 @@ export const getCategories =
         "/categories"
       );
 
+    // Handle { categories: [...] } or { data: [...] } or plain array
     return (
-      res.data.categories ||
-      res.data.categories 
-      
+      res.data?.categories ??
+      res.data?.data ??
+      (Array.isArray(res.data) ? res.data : [])
     );
   };
 

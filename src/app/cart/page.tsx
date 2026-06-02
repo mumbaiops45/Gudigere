@@ -25,6 +25,7 @@ import { toast } from "sonner";
 
 import useCartStore from "../../store/cartStore";
 import useAuthStore from "../../store/authStore";
+import { createOrder, dummyPayment } from "../../services/orderService";
 
 /* ── Indian states list ─────────────────────────────────────────── */
 const INDIAN_STATES = [
@@ -99,7 +100,10 @@ function StepBar({ step }: { step: Step }) {
 /* ── Main component ─────────────────────────────────────────────── */
 export default function CartPage() {
   const router = useRouter();
-  const { token } = useAuthStore() as { token: string | null };
+  const { token: storeToken } = useAuthStore() as { token: string | null };
+  // Fallback to localStorage — authStore has no persist, LayoutWrapper hydrates it async
+  // but CartPage's useEffect runs BEFORE LayoutWrapper's, so the store token can be null
+  const token = storeToken || (typeof window !== "undefined" ? localStorage.getItem("token") : null);
   const { cartItems, removeFromCart, updateQuantity, clearCart } =
     useCartStore() as {
       cartItems: Array<{
@@ -163,11 +167,39 @@ export default function CartPage() {
     }
 
     setPlacing(true);
-    await new Promise((r) => setTimeout(r, 1500)); // simulate API call
-    clearCart();
-    setStep("confirmed");
-    setPlacing(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    try {
+      const orderData = {
+        orderItems: cartItems.map((item) => ({
+          product: item._id,
+          quantity: item.quantity,
+          price: item.price,
+        })),
+        shippingAddress: {
+          fullName: address.fullName,
+          mobile: address.mobile,
+          address: `${address.flat}, ${address.area}`,
+          city: address.city,
+          state: address.state,
+          pincode: address.pincode,
+          country: "India",
+        },
+        totalPrice: total,
+      };
+
+      const orderRes = await createOrder(orderData);
+      const orderId = orderRes?.order?._id || orderRes?._id;
+      if (orderId) {
+        await dummyPayment(orderId);
+      }
+
+      clearCart();
+      setStep("confirmed");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to place order. Please try again.");
+    } finally {
+      setPlacing(false);
+    }
   };
 
   const handleBack = () => {
@@ -242,8 +274,14 @@ export default function CartPage() {
 
           <div className="flex flex-col gap-3 mt-8">
             <button
-              onClick={() => router.push("/")}
+              onClick={() => router.push("/orders")}
               className="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-3.5 rounded-2xl transition-colors shadow-md hover:shadow-pink-200 hover:shadow-lg"
+            >
+              View My Orders
+            </button>
+            <button
+              onClick={() => router.push("/")}
+              className="w-full border-2 border-gray-200 text-gray-700 font-bold py-3.5 rounded-2xl hover:bg-gray-50 transition-colors"
             >
               Continue Shopping
             </button>

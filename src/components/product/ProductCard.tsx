@@ -5,11 +5,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, Eye, Star, Check } from "lucide-react";
+import { ShoppingCart, Eye, Star, Check, Heart } from "lucide-react";
 import { toast } from "sonner";
 import { Product } from "@/services/productService";
+import { addToWishlist, removeWishlistItem } from "@/services/wishlistService";
 import useCartStore from "@/store/cartStore";
 import useAuthStore from "@/store/authStore";
+import useWishlistStore from "@/store/wishlistStore";
 
 interface ProductCardProps {
   product: Product;
@@ -17,14 +19,56 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const router = useRouter();
-  const { token } = useAuthStore() as { token: string | null };
+  const { token: storeToken } = useAuthStore() as { token: string | null };
+  const token = storeToken || (typeof window !== "undefined" ? localStorage.getItem("token") : null);
   const { cartItems, addToCart } = useCartStore() as {
     cartItems: (Product & { quantity: number })[];
     addToCart: (p: Product & { quantity: number }) => void;
   };
 
+  const { wishlistItems, setWishlistItems } = useWishlistStore();
+
   const [added, setAdded] = useState(false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
   const inCart = cartItems.some((i) => i._id === product._id);
+  const inWishlist = wishlistItems.some((i) => i._id === product._id);
+
+  const handleWishlist = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!token) {
+      toast.error("Please login to save to wishlist");
+      router.push("/login");
+      return;
+    }
+    setWishlistLoading(true);
+
+    // Snapshot current list so we can revert if API fails
+    const snapshot = wishlistItems;
+
+    // Optimistic update FIRST — item shows immediately
+    if (inWishlist) {
+      setWishlistItems(snapshot.filter((i) => i._id !== product._id));
+    } else {
+      setWishlistItems([...snapshot, product as any]);
+    }
+
+    try {
+      if (inWishlist) {
+        await removeWishlistItem(product._id);
+        toast.success("Removed from wishlist");
+      } else {
+        await addToWishlist(product._id);
+        toast.success("Added to wishlist!");
+      }
+    } catch {
+      // Revert to snapshot on failure
+      setWishlistItems(snapshot);
+      toast.error("Something went wrong");
+    } finally {
+      setWishlistLoading(false);
+    }
+  };
   const inStock = product.stock > 0;
   const image = product.images?.[0] || "https://placehold.co/400x300/fce4f3/e91e8c?text=No+Image";
   const categoryName =
@@ -62,10 +106,22 @@ export default function ProductCard({ product }: ProductCardProps) {
         />
         {/* Quick view */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
-        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <div className="bg-white/95 backdrop-blur-sm p-2 rounded-full shadow-md">
-            <Eye size={15} className="text-gray-600" />
+        <div className="absolute top-3 right-3 flex flex-col gap-2">
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <div className="bg-white/95 backdrop-blur-sm p-2 rounded-full shadow-md">
+              <Eye size={15} className="text-gray-600" />
+            </div>
           </div>
+          <button
+            onClick={handleWishlist}
+            disabled={wishlistLoading}
+            className="bg-white/95 backdrop-blur-sm p-2 rounded-full shadow-md transition-colors"
+          >
+            <Heart
+              size={15}
+              className={inWishlist ? "fill-pink-500 text-pink-500" : "text-gray-400 hover:text-pink-500"}
+            />
+          </button>
         </div>
         {!inStock && (
           <span className="absolute top-3 left-3 bg-gray-700 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">

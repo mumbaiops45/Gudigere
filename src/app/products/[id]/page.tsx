@@ -8,6 +8,7 @@ import {
   ShoppingCart,
   Minus,
   Plus,
+  Heart,
 } from "lucide-react";
 
 import {
@@ -18,6 +19,13 @@ import {
 import useCartStore from "../../../store/cartStore";
 
 import useAuthStore from "../../../store/authStore";
+
+import {
+  addToWishlist,
+  removeWishlistItem,
+} from "../../../services/wishlistService";
+
+import useWishlistStore from "../../../store/wishlistStore";
 
 import { useRouter } from "next/navigation";
 
@@ -31,10 +39,15 @@ export default function ProductDetailsPage() {
   const router =
     useRouter();
 
-  const { token } =
-    useAuthStore();
+  const { token: storeToken } = useAuthStore();
+  const token = storeToken || (typeof window !== "undefined" ? localStorage.getItem("token") : null);
 
   const { addToCart } = useCartStore();
+
+  const {
+    wishlistItems,
+    setWishlistItems,
+  } = useWishlistStore();
 
   const [
     product,
@@ -48,6 +61,9 @@ export default function ProductDetailsPage() {
 
   const [quantity, setQuantity] =
     useState(1);
+
+  const [wishlistLoading, setWishlistLoading] =
+    useState(false);
 
   // FETCH PRODUCT
   const fetchProduct =
@@ -97,6 +113,84 @@ export default function ProductDetailsPage() {
       handleAddToCart();
 
       router.push("/cart");
+    };
+
+  // WISHLIST
+  const inWishlist =
+    product
+      ? wishlistItems.some(
+          (i) => i._id === product._id
+        )
+      : false;
+
+  const handleWishlist =
+    async () => {
+
+      if (!token) {
+        toast.error(
+          "Please login first"
+        );
+        router.push("/login");
+        return;
+      }
+
+      if (!product) return;
+
+      setWishlistLoading(true);
+
+      // Snapshot for revert
+      const snapshot = wishlistItems;
+
+      // Optimistic update FIRST
+      if (inWishlist) {
+        setWishlistItems(
+          snapshot.filter(
+            (i) => i._id !== product._id
+          )
+        );
+      } else {
+        setWishlistItems([
+          ...snapshot,
+          product as any,
+        ]);
+      }
+
+      try {
+
+        if (inWishlist) {
+
+          await removeWishlistItem(
+            product._id
+          );
+
+          toast.success(
+            "Removed from wishlist"
+          );
+
+        } else {
+
+          await addToWishlist(
+            product._id
+          );
+
+          toast.success(
+            "Added to wishlist!"
+          );
+        }
+
+      } catch {
+
+        // Revert on failure
+        setWishlistItems(snapshot);
+
+        toast.error(
+          "Something went wrong"
+        );
+
+      } finally {
+
+        setWishlistLoading(false);
+      }
     };
 
   // LOADING
@@ -247,6 +341,29 @@ export default function ProductDetailsPage() {
                 className="h-14 rounded-xl bg-gray-900 hover:bg-black active:bg-gray-950 transition-all duration-150 text-white font-black text-base shadow-sm hover:shadow-md"
               >
                 Buy Now
+              </button>
+
+              {/* WISHLIST */}
+              <button
+                onClick={handleWishlist}
+                disabled={wishlistLoading}
+                className={`sm:col-span-2 h-14 rounded-xl border-2 font-black text-base flex items-center justify-center gap-2.5 transition-all duration-150 ${
+                  inWishlist
+                    ? "border-pink-500 bg-pink-50 text-pink-600 hover:bg-pink-100"
+                    : "border-gray-200 text-gray-600 hover:border-pink-400 hover:text-pink-600 hover:bg-pink-50"
+                }`}
+              >
+                <Heart
+                  size={20}
+                  className={
+                    inWishlist
+                      ? "fill-pink-500 text-pink-500"
+                      : ""
+                  }
+                />
+                {inWishlist
+                  ? "Saved to Wishlist"
+                  : "Add to Wishlist"}
               </button>
 
             </div>
