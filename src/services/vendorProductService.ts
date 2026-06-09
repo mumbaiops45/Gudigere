@@ -44,6 +44,8 @@ export interface Product {
 
   isActive: boolean;
 
+  age?: number;
+
   createdAt?: string;
 
   updatedAt?: string;

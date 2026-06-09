@@ -230,7 +230,7 @@ export default function ProductDetailsPage() {
                 product.images?.[0]
               }
               alt={
-                product.name
+                product.title
               }
               className="w-full h-[600px] object-cover"
             />
@@ -243,16 +243,14 @@ export default function ProductDetailsPage() {
             {/* CATEGORY */}
             <p className="text-pink-600 font-bold uppercase tracking-wider">
 
-              {typeof product.category === "string"
-  ? product.category
-  : product.category?.name}
+              {product.category}
 
             </p>
 
             {/* NAME */}
             <h1 className="text-5xl font-black text-black mt-3">
 
-              {product.name}
+              {product.title}
 
             </h1>
 

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ChevronLeft, Home, PackageSearch } from "lucide-react";
 
-import { getProducts, Product } from "../../../services/productService";
+import { getAllProducts, Product } from "../../../services/productService";
 import CategoryProductCard from "./CategoryProductCard";
 
 interface Props {
@@ -12,7 +12,7 @@ export default async function CategoryProductsPage({ params }: Props) {
   const { category } = await params;
   const categoryName = decodeURIComponent(category);
 
-  const products = await getProducts();
+  const products = await getAllProducts();
 
   // Debug log in server terminal
   if (products.length > 0) {

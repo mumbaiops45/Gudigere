@@ -87,7 +87,7 @@ export default function CategoryProductCard({ product, index }: Props) {
 
     addToCart({ ...product, quantity: 1 });
     setAdded(true);
-    toast.success(`${product.name} added to cart!`);
+    toast.success(`${product.title} added to cart!`);
     setTimeout(() => setAdded(false), 2000);
   };
 
@@ -159,7 +159,7 @@ export default function CategoryProductCard({ product, index }: Props) {
         <div className="relative h-[240px] overflow-hidden bg-gray-50">
           <motion.img
             src={product.images?.[0] || "https://placehold.co/400x300/f3f4f6/9ca3af?text=No+Image"}
-            alt={product.name}
+            alt={product.title}
             animate={{ scale: hovered ? 1.08 : 1 }}
             transition={{ duration: 0.4 }}
             className="w-full h-full object-cover"
@@ -179,7 +179,7 @@ export default function CategoryProductCard({ product, index }: Props) {
         {/* NAME */}
         <Link href={`/products/${product._id}`}>
           <h3 className="font-black text-gray-900 text-lg leading-tight line-clamp-2 hover:text-pink-600 transition-colors duration-200">
-            {product.name}
+            {product.title}
           </h3>
         </Link>
 

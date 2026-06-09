@@ -71,8 +71,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
   const inStock = product.stock > 0;
   const image = product.images?.[0] || "https://placehold.co/400x300/fce4f3/e91e8c?text=No+Image";
-  const categoryName =
-    typeof product.category === "object" ? product.category?.name : product.category;
+  const categoryName = product.category;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -85,7 +84,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     if (!inStock) { toast.error("Out of stock"); return; }
     addToCart({ ...product, quantity: 1 });
     setAdded(true);
-    toast.success(`${product.name} added to cart!`);
+    toast.success(`${product.title} added to cart!`);
     setTimeout(() => setAdded(false), 2000);
   };
 
@@ -99,7 +98,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       <Link href={`/products/${product._id}`} className="block relative h-56 overflow-hidden bg-gray-50">
         <Image
           src={image}
-          alt={product.name}
+          alt={product.title || "Product image"}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -140,7 +139,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         <Link href={`/products/${product._id}`}>
           <h3 className="font-bold text-gray-900 text-sm leading-snug line-clamp-2 hover:text-pink-600 transition-colors">
-            {product.name}
+            {product.title}
           </h3>
         </Link>
 

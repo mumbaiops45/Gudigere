@@ -3,11 +3,7 @@
 import { useEffect, useState } from "react";
 
 import ProductCard from "@/components/product/ProductCard";
-
-import {
-  Product,
-  getProducts,
-} from "@/services/productService";
+import {Product,getAllProducts as getProducts} from "@/services/productService"; 
 
 export default function ProductsPage() {
   const [products, setProducts] =

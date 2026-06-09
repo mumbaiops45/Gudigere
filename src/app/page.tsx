@@ -7,18 +7,13 @@ import ShopByAge from "./components/ShopByAge";
 import Testimonials from "./components/Testimonials";
 import BrandsNewsletter from "./components/BrandsNewsletter";
 import WhyChooseUs from "./components/WhyChooseUs";
-import { getCategories } from "@/services/categoryService";
-
-export default async function Home() {
-  // Fetch on the server — no client waterfall, no loading spinner
-  const categories = await getCategories().catch(() => []);
-
+export default function Home() {
   return (
     <div className="bg-white min-h-screen">
 
       <ScrollReveal />
       <Hero />
-      <CategorySection categories={categories} />
+      <CategorySection />
       <FeaturedProducts />
       <DealOfTheDay />
       <ShopByAge />

@@ -370,8 +370,7 @@ export default function OrdersPage() {
                          ?.image || "/no-image.png"
                       }
                       alt={
-                        item.product
-                          ?.title
+                        item.product?.title || "Product"
                       }
                       className="w-20 h-20 rounded-xl object-cover"
                     />

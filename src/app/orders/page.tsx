@@ -123,7 +123,7 @@ export default function OrdersPage() {
                                                 {item.product?.image ? (
                                                     <img
                                                         src={item.product.image}
-                                                        alt={item.product.title}
+                                                        alt={item.product.title || "Product"}
                                                         className="w-full h-full object-cover"
                                                     />
                                                 ) : (

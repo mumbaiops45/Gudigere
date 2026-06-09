@@ -19,7 +19,7 @@ export default function ProductCard({ product }: Props) {
 
         <img
           src={product.image}
-          alt={product.title}
+          alt={product.title || product.name || "Product image"}
           className="h-full w-full object-contain p-5 group-hover:scale-[1.07] transition-transform duration-500"
         />
 

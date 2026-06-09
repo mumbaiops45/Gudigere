@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ShoppingCart, Sparkles } from "lucide-react";
-import { getProducts, Product } from "@/services/productService";
+import { getAllProducts as getProducts, Product } from "@/services/productService";
 import ProductCard from "@/components/product/ProductCard";
 
 function Skeleton() {

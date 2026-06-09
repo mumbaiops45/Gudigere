@@ -63,7 +63,7 @@ export default function ProductsPage() {
         (
           product: Product
         ) =>
-          product.name
+          product.title
             .toLowerCase()
             .includes(
               search.toLowerCase()
@@ -186,7 +186,7 @@ export default function ProductsPage() {
                           .images?.[0]
                       }
                       alt={
-                        product.name
+                        product.title
                       }
                       className="w-16 h-16 rounded-xl object-cover border border-gray-200"
                     />
@@ -197,7 +197,7 @@ export default function ProductsPage() {
                   <td className="px-6 py-4 font-semibold text-black">
 
                     {
-                      product.name
+                      product.title
                     }
 
                   </td>
@@ -212,9 +212,7 @@ export default function ProductsPage() {
                       "N/A"
                     } */}
                     {
-                      typeof product.category === "string"
-                        ? product.category
-                        : product.category?.name || "N/A"
+                      product.category || "N/A"
                     }
                   </td>
 
@@ -222,10 +220,7 @@ export default function ProductsPage() {
                   <td className="px-6 py-4 text-gray-500">
 
                     {
-                      product
-                        .vendor
-                        ?.shopName ||
-                      "N/A"
+                      product.vendor || "N/A"
                     }
 
                   </td>
@@ -340,7 +335,7 @@ export default function ProductsPage() {
                     .images?.[0]
                 }
                 alt={
-                  viewProduct.name
+                  viewProduct.title
                 }
                 className="w-full h-full object-cover"
               />
@@ -354,7 +349,7 @@ export default function ProductsPage() {
               <h2 className="text-4xl font-bold text-black">
 
                 {
-                  viewProduct.name
+                  viewProduct.title
                 }
 
               </h2>
