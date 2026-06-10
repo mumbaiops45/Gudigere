@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, ShoppingCart, Check, Star, Heart } from "lucide-react";
 import { toast } from "sonner";
@@ -12,6 +11,7 @@ import useCartStore from "../../../store/cartStore";
 import useWishlistStore from "../../../store/wishlistStore";
 import { addToWishlist, removeWishlistItem } from "../../../services/wishlistService";
 import { Product } from "../../../services/productService";
+import LoginPromptModal from "../../../components/LoginPromptModal";
 
 interface Props {
   product: Product;
@@ -19,7 +19,6 @@ interface Props {
 }
 
 export default function CategoryProductCard({ product, index }: Props) {
-  const router = useRouter();
   const { token } = useAuthStore() as { token: string | null };
   const { cartItems, addToCart } = useCartStore() as {
     cartItems: (Product & { quantity: number })[];
@@ -31,6 +30,7 @@ export default function CategoryProductCard({ product, index }: Props) {
   const [added, setAdded] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
+  const [loginModal, setLoginModal] = useState<"cart" | "wishlist" | null>(null);
 
   const inCart = cartItems.some((item) => item._id === product._id);
   const inStock = product.stock > 0;
@@ -42,8 +42,7 @@ export default function CategoryProductCard({ product, index }: Props) {
 
     const localToken = typeof window !== "undefined" ? localStorage.getItem("token") : null;
     if (!token && !localToken) {
-      toast.error("Please login to save to wishlist");
-      router.push("/login");
+      setLoginModal("wishlist");
       return;
     }
 
@@ -75,8 +74,7 @@ export default function CategoryProductCard({ product, index }: Props) {
 
   const handleAddToCart = () => {
     if (!token) {
-      toast.error("Please login to add items to cart");
-      router.push("/login");
+      setLoginModal("cart");
       return;
     }
 
@@ -97,13 +95,19 @@ export default function CategoryProductCard({ product, index }: Props) {
       : null;
 
   return (
+    <>
+    <LoginPromptModal
+      open={loginModal !== null}
+      onClose={() => setLoginModal(null)}
+      action={loginModal ?? "cart"}
+    />
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.06 }}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
-      className="group relative bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-shadow duration-300"
+      className="group relative bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-shadow duration-300 flex flex-col h-full"
     >
       {/* STOCK BADGE */}
       {!inStock && (
@@ -168,7 +172,7 @@ export default function CategoryProductCard({ product, index }: Props) {
       </Link>
 
       {/* CONTENT */}
-      <div className="p-5">
+      <div className="p-5 flex flex-col flex-1">
         {/* VENDOR */}
         {vendorName && (
           <p className="text-xs font-semibold text-pink-500 uppercase tracking-wider mb-1">
@@ -203,13 +207,15 @@ export default function CategoryProductCard({ product, index }: Props) {
               ₹{product.price.toLocaleString()}
             </span>
           </div>
-          <span className="text-xs text-gray-400">
-            {product.stock} left
-          </span>
+          {product.stock > 0 && product.stock <= 10 && (
+            <span className="text-xs text-orange-500 font-semibold">
+              {product.stock} left
+            </span>
+          )}
         </div>
 
         {/* BUTTONS */}
-        <div className="flex gap-3 mt-5">
+        <div className="flex gap-3 mt-auto pt-5">
           {/* VIEW */}
           <Link href={`/products/${product._id}`} className="flex-1">
             <button className="w-full h-11 rounded-xl border border-gray-200 hover:border-pink-400 hover:bg-pink-50 text-gray-600 hover:text-pink-600 transition-all duration-150 flex items-center justify-center gap-2 font-semibold text-sm">
@@ -258,5 +264,6 @@ export default function CategoryProductCard({ product, index }: Props) {
         </div>
       </div>
     </motion.div>
+    </>
   );
 }

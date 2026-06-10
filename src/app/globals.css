@@ -362,3 +362,4 @@ body {
   animation: ticker-slide 30s linear infinite;
 }
 .ticker-track:hover { animation-play-state: paused }
+

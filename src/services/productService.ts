@@ -10,7 +10,7 @@ const getToken = (): string | null => {
 // Complete Product interface matching your schema
 export interface Product {
   _id: string;
-  vendor: string;
+  vendor: string | { _id: string; shopName: string };
   title: string;           // ✅ changed from 'name'
   description: string;
   price: number;
@@ -52,6 +52,13 @@ export const updateProduct = async (id: string, payload: any): Promise<Product> 
 
 export const deleteProduct = async (id: string): Promise<any> => {
   const res = await API.delete(`/vendor/products/${id}`, {
+    headers: { Authorization: `Bearer ${getToken()}` },
+  });
+  return res.data;
+};
+
+export const adminDeleteProduct = async (id: string): Promise<any> => {
+  const res = await API.delete(`/products/${id}`, {
     headers: { Authorization: `Bearer ${getToken()}` },
   });
   return res.data;

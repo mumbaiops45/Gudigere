@@ -20,27 +20,18 @@ import {
   Shield,
   Truck,
   AlertCircle,
+  CreditCard,
+  Banknote,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import useCartStore from "../../store/cartStore";
 import useAuthStore from "../../store/authStore";
-import { createOrder, dummyPayment } from "../../services/orderService";
-
-/* ── Indian states list ─────────────────────────────────────────── */
-const INDIAN_STATES = [
-  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
-  "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka",
-  "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya",
-  "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim",
-  "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand",
-  "West Bengal", "Delhi", "Jammu & Kashmir", "Ladakh", "Puducherry",
-  "Chandigarh", "Dadra & Nagar Haveli", "Daman & Diu", "Lakshadweep",
-  "Andaman & Nicobar Islands",
-];
+import { createOrder, createPayment, verifyPayment, dummyPayment } from "../../services/orderService";
 
 type AddressType = "Home" | "Office";
-type Step = "cart" | "address" | "confirmed";
+type Step = "cart" | "address" | "payment" | "confirmed";
+type PaymentMethod = "razorpay" | "cod";
 
 interface Address {
   fullName: string;
@@ -64,14 +55,27 @@ const EMPTY_ADDRESS: Address = {
   type: "Home",
 };
 
+/* ── Load Razorpay script ─────────────────────────────────────────── */
+function loadRazorpayScript(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if ((window as any).Razorpay) { resolve(true); return; }
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
+
 /* ── Step indicator ─────────────────────────────────────────────── */
 function StepBar({ step }: { step: Step }) {
   const steps: { key: Step; label: string }[] = [
     { key: "cart", label: "Cart" },
     { key: "address", label: "Address" },
-    { key: "confirmed", label: "Payment" },
+    { key: "payment", label: "Payment" },
   ];
-  const active = steps.findIndex((s) => s.key === step);
+  const order: Step[] = ["cart", "address", "payment", "confirmed"];
+  const active = order.indexOf(step);
 
   return (
     <div className="flex items-center gap-1">
@@ -79,9 +83,9 @@ function StepBar({ step }: { step: Step }) {
         <div key={s.key} className="flex items-center gap-1">
           <span
             className={`text-sm font-bold transition-colors ${
-              i === active
+              order.indexOf(s.key) === active
                 ? "text-pink-600"
-                : i < active
+                : order.indexOf(s.key) < active
                 ? "text-green-600"
                 : "text-gray-400"
             }`}
@@ -101,9 +105,9 @@ function StepBar({ step }: { step: Step }) {
 export default function CartPage() {
   const router = useRouter();
   const { token: storeToken } = useAuthStore() as { token: string | null };
-  // Fallback to localStorage — authStore has no persist, LayoutWrapper hydrates it async
-  // but CartPage's useEffect runs BEFORE LayoutWrapper's, so the store token can be null
-  const token = storeToken || (typeof window !== "undefined" ? localStorage.getItem("token") : null);
+  const token =
+    storeToken ||
+    (typeof window !== "undefined" ? localStorage.getItem("token") : null);
   const { cartItems, removeFromCart, updateQuantity, clearCart } =
     useCartStore() as {
       cartItems: Array<{
@@ -123,7 +127,21 @@ export default function CartPage() {
 
   const [step, setStep] = useState<Step>("cart");
   const [address, setAddress] = useState<Address>(EMPTY_ADDRESS);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("razorpay");
+  const { user } = useAuthStore() as any;
   const [placing, setPlacing] = useState(false);
+  const [loadingPincode, setLoadingPincode] = useState(false);
+  const [pincodeError, setPincodeError] = useState("");
+  const [confirmedTotal, setConfirmedTotal] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+    setAddress((prev) => ({
+      ...prev,
+      fullName: user?.name || "",
+      mobile: user?.mobile || user?.phone || "",
+    }));
+  }, [user]);
 
   /* redirect guests */
   useEffect(() => {
@@ -136,36 +154,30 @@ export default function CartPage() {
   /* ── Price maths ── */
   const totalItems = cartItems.reduce((s, i) => s + i.quantity, 0);
   const subtotal = cartItems.reduce((s, i) => s + i.price * i.quantity, 0);
-  const discount = Math.floor(subtotal * 0.05); // flat 5% site discount
-  const deliveryFee = subtotal - discount >= 499 ? 0 : 49;
-  const total = subtotal - discount + deliveryFee;
-  const amountNeededForFreeDelivery = 499 - (subtotal - discount);
+  const deliveryFee = subtotal >= 2000 ? 0 : 50;
+  const total = subtotal + deliveryFee;
+  const amountNeededForFreeDelivery = Math.max(0, 2000 - subtotal);
 
   /* ── Handlers ── */
   const handleProceed = () => {
-    if (cartItems.length === 0) {
-      toast.error("Your cart is empty");
-      return;
-    }
+    if (cartItems.length === 0) { toast.error("Your cart is empty"); return; }
     setStep("address");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handlePlaceOrder = async () => {
+  const handleConfirmAddress = () => {
     const { fullName, mobile, pincode, flat, area, city, state } = address;
     if (!fullName || !mobile || !pincode || !flat || !area || !city || !state) {
       toast.error("Please fill all required fields");
       return;
     }
-    if (mobile.length !== 10) {
-      toast.error("Enter a valid 10-digit mobile number");
-      return;
-    }
-    if (pincode.length !== 6) {
-      toast.error("Enter a valid 6-digit pincode");
-      return;
-    }
+    if (mobile.length !== 10) { toast.error("Enter a valid 10-digit mobile number"); return; }
+    if (pincode.length !== 6) { toast.error("Enter a valid 6-digit pincode"); return; }
+    setStep("payment");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
+  const handlePlaceOrder = async () => {
     setPlacing(true);
     try {
       const orderData = {
@@ -186,32 +198,131 @@ export default function CartPage() {
         totalPrice: total,
       };
 
-      const orderRes = await createOrder(orderData);
-      const orderId = orderRes?.order?._id || orderRes?._id;
-      if (orderId) {
-        await dummyPayment(orderId);
+      if (paymentMethod === "cod") {
+        const orderRes = await createOrder(orderData);
+        const orderId = orderRes?.order?._id || orderRes?._id;
+        if (orderId) await dummyPayment(orderId);
+        setConfirmedTotal(total);
+        clearCart();
+        setStep("confirmed");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
       }
 
-      clearCart();
-      setStep("confirmed");
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      /* ── Razorpay flow ── */
+      const scriptLoaded = await loadRazorpayScript();
+      if (!scriptLoaded) {
+        toast.error("Failed to load payment gateway. Please try again.");
+        return;
+      }
+
+      const orderRes = await createOrder(orderData);
+      const orderId = orderRes?.order?._id || orderRes?._id;
+      if (!orderId) { toast.error("Order creation failed. Please try again."); return; }
+
+      const paymentData = await createPayment(orderId);
+      const { razorpayOrderId, amount, currency, key } = paymentData;
+
+      const options = {
+        key: key || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        amount,
+        currency: currency || "INR",
+        name: "GoodieGear",
+        description: "Toy Store Payment",
+        order_id: razorpayOrderId,
+        handler: async (response: any) => {
+          try {
+            await verifyPayment({
+              orderId,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpayOrderId: response.razorpay_order_id,
+              razorpaySignature: response.razorpay_signature,
+            });
+            setConfirmedTotal(total);
+            clearCart();
+            setStep("confirmed");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          } catch {
+            toast.error("Payment verification failed. Contact support.");
+          }
+        },
+        prefill: {
+          name: address.fullName,
+          contact: address.mobile,
+        },
+        theme: { color: "#db2777" },
+        modal: {
+          ondismiss: () => {
+            toast.error("Payment cancelled.");
+            setPlacing(false);
+          },
+        },
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to place order. Please try again.");
+      toast.error(
+        err?.response?.data?.message || "Failed to place order. Please try again."
+      );
     } finally {
       setPlacing(false);
     }
   };
 
   const handleBack = () => {
-    if (step === "address") {
-      setStep("cart");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } else {
-      router.back();
+    if (step === "payment") { setStep("address"); window.scrollTo({ top: 0, behavior: "smooth" }); }
+    else if (step === "address") { setStep("cart"); window.scrollTo({ top: 0, behavior: "smooth" }); }
+    else router.back();
+  };
+
+  const fetchAddressFromPincode = async (pincode: string) => {
+    if (pincode.length !== 6) return;
+    try {
+      setLoadingPincode(true);
+      setPincodeError("");
+      const response = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
+      const data = await response.json();
+      if (data?.[0]?.Status === "Success" && data?.[0]?.PostOffice?.length) {
+        const office = data[0].PostOffice[0];
+        setAddress((prev) => ({
+          ...prev,
+          city: office.District || office.Block || office.Name || "",
+          state: office.State || "",
+          area: prev.area || office.Name || "",
+        }));
+      } else {
+        setPincodeError("Invalid Pincode");
+      }
+    } catch {
+      setPincodeError("Unable to fetch location");
+    } finally {
+      setLoadingPincode(false);
     }
   };
 
-  /* ── Guard: not logged in ── */
+  const getCurrentLocation = () => {
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+        );
+        const data = await response.json();
+        setAddress((prev) => ({
+          ...prev,
+          city: data?.address?.city || "",
+          state: data?.address?.state || "",
+          area: data?.address?.suburb || data?.address?.neighbourhood || "",
+          pincode: data?.address?.postcode || "",
+        }));
+      },
+      () => toast.error("Location permission denied")
+    );
+  };
+
+  /* ── Guard ── */
   if (!token) return null;
 
   /* ── Order confirmed screen ── */
@@ -224,7 +335,6 @@ export default function CartPage() {
           transition={{ type: "spring", stiffness: 200, damping: 20 }}
           className="bg-white rounded-3xl shadow-xl p-8 sm:p-12 max-w-md w-full text-center"
         >
-          {/* Success icon */}
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -233,14 +343,10 @@ export default function CartPage() {
           >
             <CheckCircle size={52} className="text-green-500" />
           </motion.div>
-
           <h1 className="text-3xl font-black text-gray-900">Order Placed!</h1>
           <p className="text-gray-500 mt-3 text-base leading-relaxed">
-            Your order has been successfully placed. You'll receive a
-            confirmation SMS shortly.
+            Your order has been successfully placed. You&apos;ll receive a confirmation SMS shortly.
           </p>
-
-          {/* Address summary */}
           <div className="bg-green-50 border border-green-100 rounded-2xl p-4 mt-6 text-left">
             <p className="text-xs font-black text-green-700 uppercase tracking-wider mb-2">
               Delivering to
@@ -254,24 +360,15 @@ export default function CartPage() {
               <div className="text-sm text-gray-700 leading-relaxed">
                 <p className="font-bold">{address.fullName}</p>
                 <p className="text-gray-500">{address.mobile}</p>
-                <p className="text-gray-600 mt-0.5">
-                  {address.flat}, {address.area}
-                </p>
-                <p className="text-gray-600">
-                  {address.city}, {address.state} — {address.pincode}
-                </p>
+                <p className="text-gray-600 mt-0.5">{address.flat}, {address.area}</p>
+                <p className="text-gray-600">{address.city}, {address.state} — {address.pincode}</p>
               </div>
             </div>
           </div>
-
-          {/* Total */}
           <div className="mt-5">
             <p className="text-sm text-gray-400">Total paid</p>
-            <p className="text-3xl font-black text-pink-600 mt-1">
-              ₹{total.toLocaleString()}
-            </p>
+            <p className="text-3xl font-black text-pink-600 mt-1">₹{confirmedTotal.toLocaleString()}</p>
           </div>
-
           <div className="flex flex-col gap-3 mt-8">
             <button
               onClick={() => router.push("/orders")}
@@ -313,12 +410,9 @@ export default function CartPage() {
             <div className="w-28 h-28 bg-pink-50 rounded-full flex items-center justify-center mb-6">
               <ShoppingCart size={52} className="text-pink-300" />
             </div>
-            <h2 className="text-3xl font-black text-gray-900">
-              Your cart is empty
-            </h2>
+            <h2 className="text-3xl font-black text-gray-900">Your cart is empty</h2>
             <p className="text-gray-400 mt-3 max-w-sm leading-relaxed">
-              Looks like you haven&apos;t added anything yet. Explore our toy
-              collection!
+              Looks like you haven&apos;t added anything yet. Explore our toy collection!
             </p>
             <Link href="/">
               <button className="mt-8 bg-pink-600 hover:bg-pink-700 text-white font-bold px-10 py-3.5 rounded-full transition-colors shadow-lg hover:shadow-pink-200 hover:shadow-xl">
@@ -330,9 +424,10 @@ export default function CartPage() {
 
         {cartItems.length > 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-            {/* ── LEFT: Cart items / Address form ── */}
+            {/* ── LEFT: Cart items / Address form / Payment ── */}
             <div className="lg:col-span-2 space-y-4">
               <AnimatePresence mode="wait">
+
                 {/* STEP 1 — Cart */}
                 {step === "cart" && (
                   <motion.div
@@ -342,25 +437,30 @@ export default function CartPage() {
                     exit={{ opacity: 0, x: -20 }}
                     className="space-y-4"
                   >
-                    {/* Delivery nudge */}
+                    {/* Free delivery nudge */}
                     {deliveryFee === 0 ? (
-                      <div className="bg-green-50 border border-green-100 rounded-2xl px-5 py-3 flex items-center gap-3">
-                        <Truck size={18} className="text-green-600 shrink-0" />
-                        <p className="text-sm font-semibold text-green-700">
-                          🎉 You qualify for FREE delivery!
-                        </p>
+                      <div className="bg-green-50 border border-green-200 rounded-2xl px-5 py-3.5 flex items-center gap-3">
+                        <Truck size={20} className="text-green-600 shrink-0" />
+                        <div>
+                          <p className="text-sm font-bold text-green-700">
+                            🎉 You get FREE Delivery!
+                          </p>
+                          <p className="text-xs text-green-600 mt-0.5">
+                            Orders above ₹2,000 qualify for free delivery.
+                          </p>
+                        </div>
                       </div>
                     ) : (
-                      <div className="bg-amber-50 border border-amber-100 rounded-2xl px-5 py-3 flex items-center gap-3">
-                        <Truck size={18} className="text-amber-600 shrink-0" />
-                        <p className="text-sm text-amber-700">
-                          Add{" "}
-                          <span className="font-bold">
-                            ₹{amountNeededForFreeDelivery.toLocaleString()}
-                          </span>{" "}
-                          more to get{" "}
-                          <span className="font-bold">FREE delivery</span>
-                        </p>
+                      <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-3.5 flex items-center gap-3">
+                        <Truck size={20} className="text-amber-600 shrink-0" />
+                        <div>
+                          <p className="text-sm font-bold text-amber-700">
+                            Add ₹{amountNeededForFreeDelivery.toLocaleString()} more for FREE delivery
+                          </p>
+                          <p className="text-xs text-amber-600 mt-0.5">
+                            Free delivery on orders above ₹2,000
+                          </p>
+                        </div>
                       </div>
                     )}
 
@@ -368,9 +468,7 @@ export default function CartPage() {
                     <AnimatePresence>
                       {cartItems.map((item) => {
                         const shopName =
-                          typeof item.vendor === "object"
-                            ? item.vendor?.shopName
-                            : null;
+                          typeof item.vendor === "object" ? item.vendor?.shopName : null;
                         return (
                           <motion.div
                             key={item._id}
@@ -381,24 +479,15 @@ export default function CartPage() {
                             className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5"
                           >
                             <div className="flex gap-4">
-                              {/* Product image */}
-                              <Link
-                                href={`/products/${item._id}`}
-                                className="shrink-0"
-                              >
+                              <Link href={`/products/${item._id}`} className="shrink-0">
                                 <div className="w-[88px] h-[88px] rounded-xl overflow-hidden bg-gray-50 border border-gray-100">
                                   <img
-                                    src={
-                                      item.images?.[0] ||
-                                      "https://placehold.co/200/f3f4f6/9ca3af?text=No+Image"
-                                    }
+                                    src={item.images?.[0] || "https://placehold.co/200/f3f4f6/9ca3af?text=No+Image"}
                                     alt={item.name}
                                     className="w-full h-full object-cover"
                                   />
                                 </div>
                               </Link>
-
-                              {/* Details */}
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-start justify-between gap-3">
                                   <div className="min-w-0">
@@ -416,8 +505,6 @@ export default function CartPage() {
                                       In Stock
                                     </span>
                                   </div>
-
-                                  {/* Price */}
                                   <div className="text-right shrink-0">
                                     <p className="text-xl font-black text-pink-600">
                                       ₹{(item.price * item.quantity).toLocaleString()}
@@ -429,14 +516,10 @@ export default function CartPage() {
                                     )}
                                   </div>
                                 </div>
-
-                                {/* Qty stepper + Remove */}
                                 <div className="flex items-center justify-between mt-4 flex-wrap gap-3">
                                   <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden">
                                     <button
-                                      onClick={() =>
-                                        updateQuantity(item._id, item.quantity - 1)
-                                      }
+                                      onClick={() => updateQuantity(item._id, item.quantity - 1)}
                                       className="w-9 h-9 flex items-center justify-center hover:bg-pink-50 hover:text-pink-600 transition-colors"
                                       aria-label="Decrease quantity"
                                     >
@@ -446,9 +529,7 @@ export default function CartPage() {
                                       {item.quantity}
                                     </span>
                                     <button
-                                      onClick={() =>
-                                        updateQuantity(item._id, item.quantity + 1)
-                                      }
+                                      onClick={() => updateQuantity(item._id, item.quantity + 1)}
                                       disabled={item.quantity >= item.stock}
                                       className="w-9 h-9 flex items-center justify-center hover:bg-pink-50 hover:text-pink-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                                       aria-label="Increase quantity"
@@ -456,7 +537,6 @@ export default function CartPage() {
                                       <Plus size={14} />
                                     </button>
                                   </div>
-
                                   <button
                                     onClick={() => {
                                       removeFromCart(item._id);
@@ -483,55 +563,49 @@ export default function CartPage() {
                     key="address"
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
+                    exit={{ opacity: 0, x: -20 }}
                     className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6"
                   >
-                    {/* Header */}
                     <div className="flex items-center gap-3 mb-6">
                       <div className="w-10 h-10 bg-pink-100 rounded-full flex items-center justify-center shrink-0">
                         <MapPin size={20} className="text-pink-600" />
                       </div>
                       <div>
-                        <h2 className="text-xl font-black text-gray-900">
-                          Delivery Address
-                        </h2>
-                        <p className="text-sm text-gray-400">
-                          Where should we deliver your order?
-                        </p>
+                        <h2 className="text-xl font-black text-gray-900">Delivery Address</h2>
+                        <p className="text-sm text-gray-400">Where should we deliver your order?</p>
                       </div>
                     </div>
 
                     <div className="space-y-4">
-                      {/* Full name + Mobile */}
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-5 mb-6">
+                        <div className="flex items-start gap-3">
+                          <MapPin className="text-pink-600 mt-1" size={18} />
+                          <div>
+                            <h3 className="font-bold text-gray-900">Deliver To</h3>
+                            <p className="text-sm text-gray-600 mt-1">{address.fullName || "Customer"}</p>
+                            <p className="text-sm text-gray-500">{address.mobile}</p>
+                          </div>
+                        </div>
+                      </div>
+
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
-                            Full Name *
-                          </label>
+                          <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Full Name *</label>
                           <input
                             type="text"
                             value={address.fullName}
-                            onChange={(e) =>
-                              setAddress({ ...address, fullName: e.target.value })
-                            }
+                            onChange={(e) => setAddress({ ...address, fullName: e.target.value })}
                             placeholder="e.g. Ravi Sharma"
                             className="w-full h-12 px-4 rounded-xl border-2 border-gray-200 focus:border-pink-500 focus:outline-none text-sm transition-colors"
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
-                            Mobile Number *
-                          </label>
+                          <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Mobile Number *</label>
                           <input
                             type="tel"
                             value={address.mobile}
                             onChange={(e) =>
-                              setAddress({
-                                ...address,
-                                mobile: e.target.value
-                                  .replace(/\D/g, "")
-                                  .slice(0, 10),
-                              })
+                              setAddress({ ...address, mobile: e.target.value.replace(/\D/g, "").slice(0, 10) })
                             }
                             placeholder="10-digit number"
                             className="w-full h-12 px-4 rounded-xl border-2 border-gray-200 focus:border-pink-500 focus:outline-none text-sm transition-colors"
@@ -539,120 +613,101 @@ export default function CartPage() {
                         </div>
                       </div>
 
-                      {/* Pincode */}
+                      <button
+                        type="button"
+                        onClick={getCurrentLocation}
+                        className="flex items-center gap-2 text-pink-600 font-semibold text-sm"
+                      >
+                        <MapPin size={16} />
+                        Use Current Location
+                      </button>
+
                       <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
-                          Pincode *
-                        </label>
-                        <input
-                          type="text"
-                          value={address.pincode}
-                          onChange={(e) =>
-                            setAddress({
-                              ...address,
-                              pincode: e.target.value
-                                .replace(/\D/g, "")
-                                .slice(0, 6),
-                            })
-                          }
-                          placeholder="6-digit pincode"
-                          className="w-full h-12 px-4 rounded-xl border-2 border-gray-200 focus:border-pink-500 focus:outline-none text-sm transition-colors"
-                        />
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Pincode *</label>
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={address.pincode}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/\D/g, "").slice(0, 6);
+                              setAddress((prev) => ({ ...prev, pincode: value }));
+                              if (value.length === 6) fetchAddressFromPincode(value);
+                            }}
+                            placeholder="Enter Pincode"
+                            className="w-full h-12 px-4 rounded-xl border-2 border-gray-200 focus:border-pink-500 focus:outline-none"
+                          />
+                          {loadingPincode && (
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                              <div className="w-4 h-4 border-2 border-pink-200 border-t-pink-600 rounded-full animate-spin" />
+                            </div>
+                          )}
+                        </div>
+                        {pincodeError && <p className="text-red-500 text-xs mt-1">{pincodeError}</p>}
+                        {address.city && address.state && (
+                          <div className="mt-3 bg-green-50 border border-green-100 rounded-xl p-3">
+                            <p className="text-sm font-medium text-green-700">📍 {address.city}, {address.state}</p>
+                          </div>
+                        )}
                       </div>
 
-                      {/* Flat */}
                       <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
-                          Flat, House No., Building *
-                        </label>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Flat, House No., Building *</label>
                         <input
                           type="text"
                           value={address.flat}
-                          onChange={(e) =>
-                            setAddress({ ...address, flat: e.target.value })
-                          }
+                          onChange={(e) => setAddress({ ...address, flat: e.target.value })}
                           placeholder="Flat no., Building name"
                           className="w-full h-12 px-4 rounded-xl border-2 border-gray-200 focus:border-pink-500 focus:outline-none text-sm transition-colors"
                         />
                       </div>
 
-                      {/* Area */}
                       <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
-                          Area, Street, Sector, Village *
-                        </label>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Area, Street, Sector, Village *</label>
                         <input
                           type="text"
                           value={address.area}
-                          onChange={(e) =>
-                            setAddress({ ...address, area: e.target.value })
-                          }
+                          onChange={(e) => setAddress({ ...address, area: e.target.value })}
                           placeholder="Street / Area name"
                           className="w-full h-12 px-4 rounded-xl border-2 border-gray-200 focus:border-pink-500 focus:outline-none text-sm transition-colors"
                         />
                       </div>
 
-                      {/* City + State */}
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
-                            Town / City *
-                          </label>
+                          <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Town / City *</label>
                           <input
                             type="text"
                             value={address.city}
-                            onChange={(e) =>
-                              setAddress({ ...address, city: e.target.value })
-                            }
-                            placeholder="City"
-                            className="w-full h-12 px-4 rounded-xl border-2 border-gray-200 focus:border-pink-500 focus:outline-none text-sm transition-colors"
+                            readOnly
+                            className="w-full h-12 px-4 rounded-xl border-2 border-gray-200 bg-gray-50"
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
-                            State *
-                          </label>
-                          <select
+                          <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">State *</label>
+                          <input
+                            type="text"
                             value={address.state}
-                            onChange={(e) =>
-                              setAddress({ ...address, state: e.target.value })
-                            }
-                            className="w-full h-12 px-3 rounded-xl border-2 border-gray-200 focus:border-pink-500 focus:outline-none text-sm transition-colors bg-white"
-                          >
-                            <option value="">Select State</option>
-                            {INDIAN_STATES.map((s) => (
-                              <option key={s} value={s}>
-                                {s}
-                              </option>
-                            ))}
-                          </select>
+                            readOnly
+                            className="w-full h-12 px-4 rounded-xl border-2 border-gray-200 bg-gray-50"
+                          />
                         </div>
                       </div>
 
-                      {/* Address type */}
                       <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
-                          Address Type
-                        </label>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Address Type</label>
                         <div className="flex gap-3">
                           {(["Home", "Office"] as AddressType[]).map((t) => (
                             <button
                               key={t}
                               type="button"
-                              onClick={() =>
-                                setAddress({ ...address, type: t })
-                              }
+                              onClick={() => setAddress({ ...address, type: t })}
                               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all ${
                                 address.type === t
                                   ? "border-pink-500 bg-pink-50 text-pink-700"
                                   : "border-gray-200 text-gray-600 hover:border-gray-300"
                               }`}
                             >
-                              {t === "Home" ? (
-                                <HomeIcon size={15} />
-                              ) : (
-                                <Briefcase size={15} />
-                              )}
+                              {t === "Home" ? <HomeIcon size={15} /> : <Briefcase size={15} />}
                               {t}
                             </button>
                           ))}
@@ -660,19 +715,120 @@ export default function CartPage() {
                       </div>
                     </div>
 
-                    {/* Info note */}
                     <div className="flex items-start gap-2 mt-5 bg-blue-50 rounded-xl px-4 py-3">
-                      <AlertCircle
-                        size={15}
-                        className="text-blue-500 mt-0.5 shrink-0"
-                      />
+                      <AlertCircle size={15} className="text-blue-500 mt-0.5 shrink-0" />
                       <p className="text-xs text-blue-700">
-                        We&apos;ll send your order updates to the mobile number
-                        provided.
+                        We&apos;ll send your order updates to the mobile number provided.
                       </p>
                     </div>
 
-                    {/* Place Order CTA */}
+                    <motion.button
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleConfirmAddress}
+                      className="w-full mt-6 h-14 bg-pink-600 hover:bg-pink-700 text-white font-black text-base rounded-2xl transition-colors shadow-lg hover:shadow-pink-200 hover:shadow-xl flex items-center justify-center gap-3"
+                    >
+                      Continue to Payment
+                      <ChevronRight size={20} />
+                    </motion.button>
+                  </motion.div>
+                )}
+
+                {/* STEP 3 — Payment */}
+                {step === "payment" && (
+                  <motion.div
+                    key="payment"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6"
+                  >
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-10 h-10 bg-pink-100 rounded-full flex items-center justify-center shrink-0">
+                        <CreditCard size={20} className="text-pink-600" />
+                      </div>
+                      <div>
+                        <h2 className="text-xl font-black text-gray-900">Choose Payment Method</h2>
+                        <p className="text-sm text-gray-400">Select how you want to pay</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      {/* Razorpay option */}
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod("razorpay")}
+                        className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all ${
+                          paymentMethod === "razorpay"
+                            ? "border-pink-500 bg-pink-50"
+                            : "border-gray-200 hover:border-gray-300 bg-white"
+                        }`}
+                      >
+                        <div
+                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                            paymentMethod === "razorpay" ? "border-pink-500" : "border-gray-300"
+                          }`}
+                        >
+                          {paymentMethod === "razorpay" && (
+                            <div className="w-2.5 h-2.5 rounded-full bg-pink-500" />
+                          )}
+                        </div>
+                        <div className="flex-1 text-left">
+                          <p className="font-bold text-gray-900 text-sm">Pay Online (Razorpay)</p>
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            UPI, Credit/Debit Card, Net Banking, Wallets
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <div className="bg-[#072654] text-white text-[10px] font-black px-2 py-0.5 rounded">
+                            Razorpay
+                          </div>
+                        </div>
+                      </button>
+
+                      {/* COD option */}
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod("cod")}
+                        className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all ${
+                          paymentMethod === "cod"
+                            ? "border-pink-500 bg-pink-50"
+                            : "border-gray-200 hover:border-gray-300 bg-white"
+                        }`}
+                      >
+                        <div
+                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                            paymentMethod === "cod" ? "border-pink-500" : "border-gray-300"
+                          }`}
+                        >
+                          {paymentMethod === "cod" && (
+                            <div className="w-2.5 h-2.5 rounded-full bg-pink-500" />
+                          )}
+                        </div>
+                        <div className="flex-1 text-left">
+                          <p className="font-bold text-gray-900 text-sm">Cash on Delivery (COD)</p>
+                          <p className="text-xs text-gray-500 mt-0.5">Pay when your order arrives</p>
+                        </div>
+                        <Banknote size={22} className="text-green-600 shrink-0" />
+                      </button>
+                    </div>
+
+                    {/* Delivery address summary */}
+                    <div className="mt-5 bg-gray-50 rounded-xl p-4 flex items-start gap-3">
+                      <MapPin size={16} className="text-pink-500 mt-0.5 shrink-0" />
+                      <div className="text-sm">
+                        <p className="font-bold text-gray-900">{address.fullName}</p>
+                        <p className="text-gray-500 text-xs mt-0.5">
+                          {address.flat}, {address.area}, {address.city}, {address.state} — {address.pincode}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => { setStep("address"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                        className="ml-auto text-xs text-pink-600 font-semibold shrink-0"
+                      >
+                        Change
+                      </button>
+                    </div>
+
                     <motion.button
                       whileTap={{ scale: 0.98 }}
                       onClick={handlePlaceOrder}
@@ -682,15 +838,22 @@ export default function CartPage() {
                       {placing ? (
                         <>
                           <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          Placing Order...
+                          {paymentMethod === "razorpay" ? "Opening Payment..." : "Placing Order..."}
                         </>
                       ) : (
                         <>
                           <Package size={20} />
-                          Place Order &bull; ₹{total.toLocaleString()}
+                          {paymentMethod === "razorpay"
+                            ? `Pay ₹${total.toLocaleString()} with Razorpay`
+                            : `Place Order • ₹${total.toLocaleString()} (COD)`}
                         </>
                       )}
                     </motion.button>
+
+                    <div className="flex items-center justify-center gap-2 mt-4">
+                      <Shield size={14} className="text-green-500" />
+                      <p className="text-xs text-gray-500">100% Secure & Encrypted Payment</p>
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -714,53 +877,48 @@ export default function CartPage() {
                 </div>
               </div>
 
+              {/* Free delivery banner in summary */}
+              {deliveryFee === 0 ? (
+                <div className="bg-green-50 border border-green-200 rounded-2xl px-4 py-3 flex items-center gap-2">
+                  <Truck size={16} className="text-green-600 shrink-0" />
+                  <p className="text-sm font-bold text-green-700">🎉 FREE Delivery on this order!</p>
+                </div>
+              ) : (
+                <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 flex items-center gap-2">
+                  <Truck size={16} className="text-amber-600 shrink-0" />
+                  <p className="text-xs text-amber-700 font-medium">
+                    Add <span className="font-bold">₹{amountNeededForFreeDelivery.toLocaleString()}</span> more for FREE delivery
+                  </p>
+                </div>
+              )}
+
               {/* Price breakdown */}
               <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
                 <h3 className="font-black text-gray-900 text-base mb-4 pb-3 border-b border-gray-100 uppercase tracking-wide">
                   Price Details
                 </h3>
-
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between text-gray-600">
-                    <span>
-                      Price ({totalItems} {totalItems === 1 ? "item" : "items"})
-                    </span>
-                    <span className="font-semibold">
-                      ₹{subtotal.toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-gray-600">
-                    <span>Discount (5%)</span>
-                    <span className="font-semibold text-green-600">
-                      − ₹{discount.toLocaleString()}
-                    </span>
+                    <span>Price ({totalItems} {totalItems === 1 ? "item" : "items"})</span>
+                    <span className="font-semibold">₹{subtotal.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-gray-600">
                     <span>Delivery Charges</span>
-                    <span
-                      className={`font-semibold ${
-                        deliveryFee === 0 ? "text-green-600" : ""
-                      }`}
-                    >
-                      {deliveryFee === 0 ? "FREE" : `₹${deliveryFee}`}
+                    <span className={`font-semibold ${deliveryFee === 0 ? "text-green-600" : ""}`}>
+                      {deliveryFee === 0 ? "FREE" : "₹50"}
                     </span>
                   </div>
+                  {deliveryFee === 0 && (
+                    <div className="flex justify-between text-green-600 text-xs">
+                      <span>You saved on delivery</span>
+                      <span className="font-bold">₹50</span>
+                    </div>
+                  )}
                 </div>
-
                 <div className="border-t border-dashed border-gray-200 mt-4 pt-4 flex justify-between">
                   <span className="font-black text-gray-900">Total Amount</span>
-                  <span className="font-black text-gray-900 text-lg">
-                    ₹{total.toLocaleString()}
-                  </span>
+                  <span className="font-black text-gray-900 text-lg">₹{total.toLocaleString()}</span>
                 </div>
-
-                {discount > 0 && (
-                  <div className="mt-4 bg-green-50 rounded-xl px-4 py-2.5 text-center">
-                    <p className="text-sm text-green-700 font-semibold">
-                      🎉 You save ₹{discount.toLocaleString()} on this order!
-                    </p>
-                  </div>
-                )}
 
                 {step === "cart" && (
                   <motion.button
@@ -774,8 +932,8 @@ export default function CartPage() {
                 )}
               </div>
 
-              {/* Order items mini-list (shown in address step) */}
-              {step === "address" && (
+              {/* Order items mini-list (shown in address / payment step) */}
+              {(step === "address" || step === "payment") && (
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
                   <p className="text-xs font-black text-gray-500 uppercase tracking-wider mb-3">
                     {cartItems.length} {cartItems.length === 1 ? "Item" : "Items"} in cart
@@ -785,18 +943,13 @@ export default function CartPage() {
                       <div key={item._id} className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-50 border border-gray-100 shrink-0">
                           <img
-                            src={
-                              item.images?.[0] ||
-                              "https://placehold.co/80/f3f4f6/9ca3af?text=No"
-                            }
+                            src={item.images?.[0] || "https://placehold.co/80/f3f4f6/9ca3af?text=No"}
                             alt={item.name}
                             className="w-full h-full object-cover"
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-semibold text-gray-700 line-clamp-1">
-                            {item.name}
-                          </p>
+                          <p className="text-xs font-semibold text-gray-700 line-clamp-1">{item.name}</p>
                           <p className="text-xs text-gray-400">
                             Qty: {item.quantity} × ₹{item.price.toLocaleString()}
                           </p>

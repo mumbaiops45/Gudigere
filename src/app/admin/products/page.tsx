@@ -13,7 +13,7 @@ import useProduct from "../../../hooks/useProduct";
 
 import {
   Product,
-  deleteProduct,
+  adminDeleteProduct,
 } from "../../../services/productService";
 
 export default function ProductsPage() {
@@ -45,7 +45,7 @@ export default function ProductsPage() {
         return;
 
       try {
-        await deleteProduct(
+        await adminDeleteProduct(
           id
         );
 
@@ -218,11 +218,9 @@ export default function ProductsPage() {
 
                   {/* VENDOR */}
                   <td className="px-6 py-4 text-gray-500">
-
-                    {
-                      product.vendor || "N/A"
-                    }
-
+                    {typeof product.vendor === "object"
+                      ? product.vendor.shopName
+                      : product.vendor || "N/A"}
                   </td>
 
                   {/* PRICE */}

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, Eye, Star, Check, Heart } from "lucide-react";
 import { toast } from "sonner";
@@ -12,13 +11,13 @@ import { addToWishlist, removeWishlistItem } from "@/services/wishlistService";
 import useCartStore from "@/store/cartStore";
 import useAuthStore from "@/store/authStore";
 import useWishlistStore from "@/store/wishlistStore";
+import LoginPromptModal from "@/components/LoginPromptModal";
 
 interface ProductCardProps {
   product: Product;
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const router = useRouter();
   const { token: storeToken } = useAuthStore() as { token: string | null };
   const token = storeToken || (typeof window !== "undefined" ? localStorage.getItem("token") : null);
   const { cartItems, addToCart } = useCartStore() as {
@@ -30,6 +29,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const [added, setAdded] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
+  const [loginModal, setLoginModal] = useState<"cart" | "wishlist" | null>(null);
   const inCart = cartItems.some((i) => i._id === product._id);
   const inWishlist = wishlistItems.some((i) => i._id === product._id);
 
@@ -37,8 +37,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     e.preventDefault();
     e.stopPropagation();
     if (!token) {
-      toast.error("Please login to save to wishlist");
-      router.push("/login");
+      setLoginModal("wishlist");
       return;
     }
     setWishlistLoading(true);
@@ -77,8 +76,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     e.preventDefault();
     e.stopPropagation();
     if (!token) {
-      toast.error("Please login to add items to cart");
-      router.push("/login");
+      setLoginModal("cart");
       return;
     }
     if (!inStock) { toast.error("Out of stock"); return; }
@@ -89,6 +87,12 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
+    <>
+    <LoginPromptModal
+      open={loginModal !== null}
+      onClose={() => setLoginModal(null)}
+      action={loginModal ?? "cart"}
+    />
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -198,5 +202,9 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
       </div>
     </motion.div>
+    </>
   );
 }
+
+
+

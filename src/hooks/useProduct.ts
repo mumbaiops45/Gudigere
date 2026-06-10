@@ -1,14 +1,13 @@
-// hooks/useVendorProduct.ts
 import { useState, useEffect } from "react";
-import { getVendorProducts, Product } from "../services/productService";
+import { getAllProducts, Product } from "../services/productService";
 
-export default function useVendorProduct() {
+export default function useProduct() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchProducts = async () => {
     try {
-      const data = await getVendorProducts();
+      const data = await getAllProducts();
       setProducts(data);
     } catch (error) {
       console.log(error);

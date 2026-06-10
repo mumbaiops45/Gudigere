@@ -549,43 +549,23 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
-Search, ShoppingCart, Menu, Heart, User, X,
-  MapPin, ChevronRight, Package, LocateFixed, Loader2,
-  Flame, Car, Puzzle, BookOpen, Bot, Star, Sparkles, Gamepad2,
-  ToyBrick, Bike, Palette, Globe, // new icons for categories
+  Search, ShoppingCart, Menu, Heart, User, X,
+  MapPin, Package, LocateFixed, Loader2,
+  Flame, Star, Sparkles,
 } from "lucide-react";
 import useCartStore from "../store/cartStore";
 import useWishlistStore from "../store/wishlistStore";
+import useCategory from "../hooks/useCategory";
+import { Category } from "../services/categoryService";
 
-/* ── redesigned nav links with icons ── */
-const navLinks = [
-  { icon: Flame, label: "Trending", color: "text-orange-400" },
-  { icon: Car, label: "Remote Cars", color: "text-blue-400" },
-  { icon: Puzzle, label: "LEGO Sets", color: "text-yellow-500" },
-  { icon: BookOpen, label: "Educational", color: "text-green-500" },
-  { icon: Bot, label: "Robots", color: "text-cyan-500" },
-  { icon: Star, label: "Best Sellers", color: "text-amber-400" },
-  { icon: Sparkles, label: "New Arrivals", color: "text-pink-400" },
-  { icon: Gamepad2, label: "Board Games", color: "text-purple-500" },
-  { icon: ToyBrick, label: "Soft Toys", color: "text-rose-400" },
-  { icon: Palette, label: "Art & Craft", color: "text-indigo-400" },
-  { icon: Bike, label: "Outdoor", color: "text-emerald-500" },
-];
-
-/* redesigned drawer categories */
-const drawerCats = [
-  { icon: Car, label: "Remote Cars & RC" },
-  { icon: ToyBrick, label: "Soft Toys & Dolls" },
-  { icon: Puzzle, label: "LEGO & Building" },
-  { icon: BookOpen, label: "Educational Toys" },
-  { icon: Bot, label: "Robots & Tech" },
-  { icon: Gamepad2, label: "Board Games" },
-  { icon: Globe, label: "Video Games" },
-  { icon: Bike, label: "Drones & RC" },
-  { icon: Palette, label: "Art & Craft" },
-  { icon: Bike, label: "Outdoor & Sports" },
-];
+/* ── static special links always shown first ── */
+// const specialLinks = [
+//   { icon: Flame,    label: "Trending",     href: "/products",    color: "text-orange-400" },
+//   { icon: Star,     label: "Best Sellers", href: "/products",    color: "text-amber-400"  },
+//   { icon: Sparkles, label: "New Arrivals", href: "/products",    color: "text-pink-400"   },
+// ];
 
 /* ── types (unchanged) ── */
 interface GeoResult {
@@ -725,6 +705,8 @@ export default function Navbar() {
   const [locationOpen, setLocationOpen] = useState(false);
   const [location, setLocation] = useState({ city: "Mumbai", pin: "400001", ready: false });
   const locationRef = useRef<HTMLDivElement>(null);
+
+  const { categories } = useCategory();
 
   const cartItems = useCartStore((s: { cartItems: unknown[] }) => s.cartItems);
   const cartCount = cartItems.reduce((sum: number, item: unknown) => sum + ((item as { quantity?: number }).quantity ?? 1), 0);
@@ -881,7 +863,7 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* ── REDESIGNED CATEGORY NAV BAR (DESKTOP) ── */}
+        {/* ── CATEGORY NAV BAR (DESKTOP) — dynamic ── */}
         <nav className="bg-slate-900 shadow-md border-b border-slate-800">
           <div className="max-w-7xl mx-auto h-12 flex items-center overflow-x-auto no-scrollbar gap-1 px-4">
             {/* All Categories button */}
@@ -894,18 +876,28 @@ export default function Navbar() {
               <span className="sm:hidden">All</span>
             </button>
 
-            {/* Category pills with icons */}
-            <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
-              {navLinks.map(({ icon: Icon, label, color }) => (
-                <button
-                  key={label}
-                  className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-slate-800/50 hover:bg-slate-700 text-slate-300 hover:text-white transition-all duration-200 whitespace-nowrap"
-                >
-                  <Icon size={14} className={`${color} transition-colors`} />
-                  <span>{label}</span>
-                </button>
-              ))}
-            </div>
+            {/* Static special pills */}
+            {/* {specialLinks.map(({ icon: Icon, label, href, color }) => (
+              <Link
+                key={label}
+                href={href}
+                className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-slate-800/50 hover:bg-slate-700 text-slate-300 hover:text-white transition-all duration-200 whitespace-nowrap"
+              >
+                <Icon size={14} className={color} />
+                <span>{label}</span>
+              </Link>
+            ))} */}
+
+            {/* Dynamic category pills from API */}
+            {categories.map((cat: Category) => (
+              <Link
+                key={cat._id}
+                href={`/categories/${encodeURIComponent(cat.name)}`}
+                className="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium bg-slate-800/50 hover:bg-slate-700 text-slate-300 hover:text-white transition-all duration-200 whitespace-nowrap"
+              >
+                {cat.name}
+              </Link>
+            ))}
           </div>
         </nav>
       </header>
@@ -936,17 +928,26 @@ export default function Navbar() {
               </button>
             </div>
 
-            {/* Categories in grid layout */}
+            {/* Categories in grid layout — dynamic */}
             <div className="flex-1 overflow-y-auto p-4">
               <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Shop By Category</p>
               <div className="grid grid-cols-2 gap-2">
-                {drawerCats.map(({ icon: Icon, label }) => (
+                {categories.map((cat: Category) => (
                   <button
-                    key={label}
+                    key={cat._id}
+                    onClick={() => { router.push(`/categories/${encodeURIComponent(cat.name)}`); setDrawerOpen(false); }}
                     className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-slate-50 hover:bg-pink-50 transition-all group text-center border border-slate-100 hover:border-pink-200"
                   >
-                    <Icon size={22} className="text-slate-500 group-hover:text-pink-600 transition-colors" />
-                    <span className="text-xs font-medium text-slate-700 group-hover:text-pink-700 line-clamp-1">{label}</span>
+                    {cat.image ? (
+                      <img
+                        src={cat.image}
+                        alt={cat.name}
+                        className="w-10 h-10 rounded-lg object-cover"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-lg bg-pink-100 flex items-center justify-center text-lg">🧸</div>
+                    )}
+                    <span className="text-xs font-medium text-slate-700 group-hover:text-pink-700 line-clamp-2 leading-tight">{cat.name}</span>
                   </button>
                 ))}
               </div>

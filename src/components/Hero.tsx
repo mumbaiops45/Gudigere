@@ -25,8 +25,7 @@ const slides = [
     subtitle: "For Every Kid!",
 
     card1: {
-      img:
-        "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?q=80&w=800",
+      img:"/card1.jpg",
 
       name: "RC Cars Collection",
 
@@ -36,8 +35,7 @@ const slides = [
     },
 
     card2: {
-      img:
-        "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=800",
+      img:"/teddy.jpg",
 
       name: "Teddy Bears",
 
@@ -56,8 +54,7 @@ const slides = [
     subtitle: "Educational Toys",
 
     card1: {
-      img:
-        "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=800",
+      img: "/card2.jpg",
 
       name: "LEGO Sets",
 
@@ -68,8 +65,7 @@ const slides = [
 
     card2: {
       img:
-        "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=800",
-
+        "/science.jpg",
       name: "Science Kits",
 
       badge: "Top Rated ★",
@@ -87,9 +83,7 @@ const slides = [
     subtitle: "Soft Toys & Dolls",
 
     card1: {
-      img:
-        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?q=80&w=800",
-
+      img: "/card3.jpg",
       name: "Plush Toys",
 
       badge: "Kids Favourite",
@@ -98,9 +92,7 @@ const slides = [
     },
 
     card2: {
-      img:
-        "https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?q=80&w=800",
-
+      img: "/dollhouse.jpg",
       name: "Doll House",
 
       badge: "30% OFF Today",
@@ -111,7 +103,7 @@ const slides = [
 ];
 
 export default function Hero() {
-    const router = useRouter();
+  const router = useRouter();
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
@@ -226,7 +218,7 @@ export default function Hero() {
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
-                     onClick={() => router.push("/products")}
+                    onClick={() => router.push("/products")}
                     className="btn-shine bg-pink-600 hover:bg-black text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-md font-bold text-sm transition-colors shadow-lg"
                   >
                     Shop Now →
@@ -234,7 +226,7 @@ export default function Hero() {
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
-                     onClick={() => router.push("/cart")}
+                    onClick={() => router.push("/cart")}
                     className="bg-white/15 hover:bg-white/30 text-white px-5 sm:px-7 py-2.5 sm:py-3 rounded-md font-bold text-sm border border-white/35 transition-all"
                   >
                     View Deals
@@ -253,18 +245,6 @@ export default function Hero() {
               </motion.div>
             </AnimatePresence>
           </div>
-        </div>
-
-        {/* Slide dots */}
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex gap-1.5">
-          {slides.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrent(i)}
-              className={`rounded-full transition-all duration-300 ${i === current ? "bg-pink-500 w-5 h-1.5" : "bg-white/40 w-1.5 h-1.5"
-                }`}
-            />
-          ))}
         </div>
       </div>
     </div>

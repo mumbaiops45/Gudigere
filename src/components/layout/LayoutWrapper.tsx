@@ -32,9 +32,8 @@ export default function LayoutWrapper({
 
   const isAdmin  = pathname.startsWith("/admin");
   const isVendor = pathname.startsWith("/vendor");
-  const isAuth   = pathname === "/login" || pathname === "/register";
 
-  if (isAdmin || isVendor || isAuth) {
+  if (isAdmin || isVendor) {
     return <>{children}</>;
   }
 

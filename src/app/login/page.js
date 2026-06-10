@@ -87,7 +87,7 @@ export default function LoginPage() {
 };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-[calc(100vh-64px)] flex">
 
       {/* ── Left brand panel ── */}
       <div
