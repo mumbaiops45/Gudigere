@@ -29,10 +29,17 @@ export interface Product {
 }
 
 // Vendor-specific product endpoints (with auth)
+// export const getVendorProducts = async (): Promise<Product[]> => {
+//   const res = await API.get("/vendor/products", {
+//     headers: { Authorization: `Bearer ${getToken()}` },
+//   });
+//   return res.data;
+// };
 export const getVendorProducts = async (): Promise<Product[]> => {
-  const res = await API.get("/vendor/products", {
+  const res = await API.get("/products/vendor", {
     headers: { Authorization: `Bearer ${getToken()}` },
   });
+
   return res.data;
 };
 
@@ -72,5 +79,42 @@ export const getAllProducts = async (): Promise<Product[]> => {
 
 export const getSingleProduct = async (id: string): Promise<Product> => {
   const res = await API.get(`/products/${id}`);
+  return res.data;
+};
+
+export interface Review {
+  _id: string;
+  user: { _id: string; name: string };
+  rating: number;
+  comment: string;
+  createdAt: string;
+}
+
+export const getProductReviews = async (productId: string): Promise<Review[]> => {
+  const res = await API.get(`/products/${productId}/reviews`);
+  return res.data;
+};
+
+export const createReview = async (
+  productId: string,
+  rating: number,
+  comment: string
+) => {
+  const token =
+    localStorage.getItem("token");
+
+  const res = await API.post(
+    `/products/${productId}/reviews`,
+    {
+      rating,
+      comment,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
   return res.data;
 };

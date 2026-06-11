@@ -255,82 +255,103 @@ export default function VendorProductsPage() {
         )}
 
         {/* ── Product grid ── */}
-        {/* <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"> */}
-        <div className=" grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredProducts.map((product: Product) => (
-            <div
-              key={product._id}
-              className="group bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 h-[560px] flex flex-col">
-              <div className="relative h-52 bg-gray-100 overflow-hidden">
-                <img
-                  src={product.images?.[0] || "https://placehold.co/600x400"}
-                  alt={product.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-
-                {product.isFeatured && (
-                  <div className="absolute top-3 left-3 bg-amber-400 text-amber-900 text-xs font-bold px-3 py-1 rounded-full">
-                    ⭐ Featured
-                  </div>
-                )}
-
-                {product.discountPrice > 0 && (
-                  <div className="absolute top-3 right-3 bg-rose-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                    -
-                    {Math.round(
-                      ((product.price - product.discountPrice) /
-                        product.price) *
-                      100
-                    )}
-                    %
-                  </div>
-                )}
-
-                <div
-                  className={` absolute  bottom-3 right-3  px-3  py-1 rounded-full text-xs font-semibold
-                  ${product.stock > 0 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"} `} >
-                  {product.stock > 0
-                    ? "In Stock"
-                    : "Out of Stock"}
-                </div>
-              </div>
-              <div className="p-3">
-                <h2
-                  className="text-xl font-bold text-gray-900 leading-6 line-clamp-2 min-h-[56px]"
-                >{product.title}</h2>
-                <p
-                  className=" text-gray-500 text-sm mt-2 line-clamp-2 min-h-[50px]"
-                >{product.description}</p>
-                <div className="flex flex-wrap gap-2 mt-3">
-                  {(product.age ?? 0) > 0 && (
-                    <span className="bg-blue-50 text-blue-600 text-xs px-2.5 py-0.5 rounded-full font-medium">Age {product.age}+</span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {filteredProducts.map((product: Product) => {
+            const pct = product.discountPrice > 0
+              ? Math.round(((product.price - product.discountPrice) / product.price) * 100)
+              : 0;
+            return (
+              <div
+                key={product._id}
+                className="group bg-white rounded-lg overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow duration-200 flex flex-col"
+              >
+                {/* Image area */}
+                <div className="relative bg-white border-b border-gray-100 flex items-center justify-center" style={{ height: 220 }}>
+                  <img
+                    src={product.images?.[0] || "https://placehold.co/400x400/f3f4f6/9ca3af?text=No+Image"}
+                    alt={product.title}
+                    className="max-h-full max-w-full object-contain p-4 transition-transform duration-300 group-hover:scale-105"
+                    style={{ height: 220 }}
+                  />
+                  {pct > 0 && (
+                    <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded">
+                      -{pct}%
+                    </div>
                   )}
+                  {product.isFeatured && (
+                    <div className="absolute top-2 right-2 bg-amber-400 text-amber-900 text-[10px] font-bold px-2 py-0.5 rounded">
+                      Featured
+                    </div>
+                  )}
+                </div>
+
+                {/* Card body */}
+                <div className="p-3 flex flex-col flex-1">
+                  {/* Brand */}
                   {product.brand && (
-                    <span className="bg-gray-100 text-gray-600 text-xs px-2.5 py-0.5 rounded-full font-medium">{product.brand}</span>
+                    <p className="text-xs text-blue-600 font-medium mb-0.5 truncate">{product.brand}</p>
                   )}
-                  {product.category && (
-                    <span className="bg-pink-50 text-pink-600 text-xs px-2.5 py-0.5 rounded-full font-medium">{product.category}</span>
-                  )}
-                </div>
-                <div className="flex items-baseline gap-2 mt-4">
-                  <span className="text-3xl font-black text-pink-600">₹{product.discountPrice || product.price}</span>
-                  {product.discountPrice > 0 && (
-                    <span className="text-gray-400 line-through text-sm">₹{product.price}</span>
-                  )}
-                </div>
-                <div className="grid grid-cols-3 gap-2 mt-5">
-                  <button onClick={() => setViewProduct(product)} className="flex-1 h-11 rounded-xl bg-gray-50 border border-gray-200 text-gray-600 hover:bg-gray-100 transition flex items-center justify-center gap-1.5 text-sm font-medium">
-                    <Eye size={13} /> View
-                  </button>
-                  <button onClick={() => handleEditOpen(product)} className="flex-1 h-11 rounded-xl bg-pink-50 border border-pink-100 text-pink-600 hover:bg-pink-100 transition flex items-center justify-center gap-1.5 text-sm font-medium">
-                    <Pencil size={13} /> Edit
-                  </button>
-                  <button onClick={() => handleDelete(product._id)} className="flex-1 h-11 rounded-xl bg-gray-900 text-white hover:bg-black transition flex items-center justify-center gap-1.5 text-sm font-medium">
-                    <Trash2 size={13} /> Delete
-                  </button>
+
+                  {/* Title */}
+                  <h2 className="text-sm font-medium text-gray-900 leading-snug line-clamp-2 min-h-10">
+                    {product.title}
+                  </h2>
+
+                  {/* Category + Age tags */}
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {product.category && (
+                      <span className="bg-gray-100 text-gray-500 text-[10px] px-2 py-0.5 rounded-full">{product.category}</span>
+                    )}
+                    {(product.age ?? 0) > 0 && (
+                      <span className="bg-blue-50 text-blue-500 text-[10px] px-2 py-0.5 rounded-full">Age {product.age}+</span>
+                    )}
+                  </div>
+
+                  {/* Price */}
+                  <div className="mt-3">
+                    <div className="flex items-baseline gap-2 flex-wrap">
+                      <span className="text-lg font-bold text-gray-900">
+                        ₹{(product.discountPrice > 0 ? product.discountPrice : product.price).toLocaleString("en-IN")}
+                      </span>
+                      {product.discountPrice > 0 && (
+                        <span className="text-xs text-gray-400 line-through">
+                          ₹{product.price.toLocaleString("en-IN")}
+                        </span>
+                      )}
+                      {pct > 0 && (
+                        <span className="text-xs text-red-600 font-medium">Save {pct}%</span>
+                      )}
+                    </div>
+                    <p className={`text-xs font-medium mt-0.5 ${product.stock > 0 ? "text-green-600" : "text-red-500"}`}>
+                      {product.stock > 0 ? "In stock" : "Out of stock"}
+                    </p>
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="grid grid-cols-3 gap-1.5 mt-auto pt-3">
+                    <button
+                      onClick={() => setViewProduct(product)}
+                      className="h-9 rounded border border-gray-300 bg-gray-50 text-gray-600 hover:bg-gray-100 transition text-xs font-medium flex items-center justify-center gap-1"
+                    >
+                      <Eye size={12} /> View
+                    </button>
+                    <button
+                      onClick={() => handleEditOpen(product)}
+                      className="h-9 rounded border border-pink-200 bg-pink-50 text-pink-600 hover:bg-pink-100 transition text-xs font-medium flex items-center justify-center gap-1"
+                    >
+                      <Pencil size={12} /> Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(product._id)}
+                      className="h-9 rounded bg-gray-900 text-white hover:bg-black transition text-xs font-medium flex items-center justify-center gap-1"
+                    >
+                      <Trash2 size={12} /> Delete
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* ══ CREATE / EDIT MODAL (redesigned) ══ */}

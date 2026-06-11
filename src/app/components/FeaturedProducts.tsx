@@ -153,18 +153,32 @@ export default function FeaturedProducts() {
         </motion.div>
 
         {/* Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+        <motion.div
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-80px" }}
+          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1 } } }}
+          className="grid grid-cols-2 lg:grid-cols-4 gap-8"
+        >
           {loading
             ? Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} />
+                <motion.div
+                  key={i}
+                  variants={{ hidden: { opacity: 0, y: 30 }, show: { opacity: 1, y: 0, transition: { duration: 0.5 } } }}
+                >
+                  <Skeleton />
+                </motion.div>
               ))
             : products.map((product) => (
-                <ProductCard
+                <motion.div
                   key={product._id}
-                  product={product}
-                />
+                  variants={{ hidden: { opacity: 0, y: 30 }, show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.1, 0.25, 1] } } }}
+                  whileHover={{ y: -6, transition: { duration: 0.22 } }}
+                >
+                  <ProductCard product={product} />
+                </motion.div>
               ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

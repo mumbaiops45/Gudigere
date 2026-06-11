@@ -553,12 +553,14 @@ import Link from "next/link";
 import {
   Search, ShoppingCart, Menu, Heart, User, X,
   MapPin, Package, LocateFixed, Loader2,
-  Flame, Star, Sparkles,
+  Flame, Star, Sparkles, LogOut, ChevronDown,
+  LayoutDashboard, ShoppingBag,
 } from "lucide-react";
 import useCartStore from "../store/cartStore";
 import useWishlistStore from "../store/wishlistStore";
 import useCategory from "../hooks/useCategory";
 import { Category } from "../services/categoryService";
+import useAuthStore from "../store/authStore";
 
 /* ── static special links always shown first ── */
 // const specialLinks = [
@@ -703,9 +705,12 @@ export default function Navbar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [locationOpen, setLocationOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [location, setLocation] = useState({ city: "Mumbai", pin: "400001", ready: false });
   const locationRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
+  const { user, logout } = useAuthStore() as { user: any; logout: () => void };
   const { categories } = useCategory();
 
   const cartItems = useCartStore((s: { cartItems: unknown[] }) => s.cartItems);
@@ -750,6 +755,23 @@ export default function Navbar() {
     if (locationOpen) document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [locationOpen]);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    if (userMenuOpen) document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [userMenuOpen]);
+
+  const handleLogout = () => {
+    logout();
+    setUserMenuOpen(false);
+    setDrawerOpen(false);
+    router.push("/");
+  };
 
   const handleLocationSelect = (city: string, pin: string) => {
     setLocation({ city, pin, ready: true });
@@ -814,13 +836,64 @@ export default function Navbar() {
               <button onClick={() => setSearchOpen(v => !v)} className="md:hidden p-2 rounded-lg hover:bg-pink-50 hover:text-pink-600 transition-colors">
                 <Search size={20} className="text-slate-700" />
               </button>
-              <button onClick={() => router.push("/login")} className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-pink-50 transition-colors group">
-                <User size={18} className="text-slate-500 group-hover:text-pink-600 transition-colors" />
-                <div className="hidden lg:block leading-tight text-left">
-                  <p className="text-[10px] text-slate-400 group-hover:text-pink-400 transition-colors">Hello, Guest</p>
-                  <p className="text-sm font-bold text-slate-800 group-hover:text-pink-600 transition-colors">Sign In</p>
+              {user ? (
+                <div ref={userMenuRef} className="relative hidden md:block">
+                  <button
+                    onClick={() => setUserMenuOpen(v => !v)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-pink-50 transition-colors group"
+                  >
+                    <div className="w-7 h-7 rounded-full bg-pink-600 flex items-center justify-center text-white text-xs font-black shrink-0">
+                      {user.name ? user.name[0].toUpperCase() : "U"}
+                    </div>
+                    <div className="hidden lg:block leading-tight text-left">
+                      <p className="text-[10px] text-slate-400">Hello,</p>
+                      <p className="text-sm font-bold text-slate-800 group-hover:text-pink-600 transition-colors max-w-24 truncate">{user.name}</p>
+                    </div>
+                    <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 hidden lg:block ${userMenuOpen ? "rotate-180" : ""}`} />
+                  </button>
+
+                  {userMenuOpen && (
+                    <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50">
+                      <div className="px-4 py-3 bg-pink-50 border-b border-pink-100">
+                        <p className="text-xs text-gray-400">Signed in as</p>
+                        <p className="text-sm font-bold text-gray-800 truncate">{user.name}</p>
+                        <p className="text-xs text-gray-400 truncate">{user.email}</p>
+                      </div>
+                      <div className="py-1.5">
+                        <button onClick={() => { router.push("/orders"); setUserMenuOpen(false); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                          <ShoppingBag size={15} className="text-gray-400" /> My Orders
+                        </button>
+                        <button onClick={() => { router.push("/wishlist"); setUserMenuOpen(false); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                          <Heart size={15} className="text-gray-400" /> Wishlist
+                        </button>
+                        {(user.role === "vendor") && (
+                          <button onClick={() => { router.push("/vendor/vendor-dashboard"); setUserMenuOpen(false); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                            <LayoutDashboard size={15} className="text-gray-400" /> Vendor Dashboard
+                          </button>
+                        )}
+                        {(user.role === "admin") && (
+                          <button onClick={() => { router.push("/admin"); setUserMenuOpen(false); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                            <LayoutDashboard size={15} className="text-gray-400" /> Admin Panel
+                          </button>
+                        )}
+                        <div className="border-t border-gray-100 mt-1 pt-1">
+                          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-rose-500 hover:bg-rose-50 transition-colors font-semibold">
+                            <LogOut size={15} /> Sign Out
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </button>
+              ) : (
+                <button onClick={() => router.push("/login")} className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-pink-50 transition-colors group">
+                  <User size={18} className="text-slate-500 group-hover:text-pink-600 transition-colors" />
+                  <div className="hidden lg:block leading-tight text-left">
+                    <p className="text-[10px] text-slate-400 group-hover:text-pink-400 transition-colors">Hello, Guest</p>
+                    <p className="text-sm font-bold text-slate-800 group-hover:text-pink-600 transition-colors">Sign In</p>
+                  </div>
+                </button>
+              )}
               <button onClick={() => router.push("/become-vendor")} className="hidden lg:flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-pink-50 transition-colors group">
                 <div className="leading-tight text-left">
                   <p className="text-[10px] text-slate-400 group-hover:text-pink-400 transition-colors">Start selling</p>
@@ -907,26 +980,52 @@ export default function Navbar() {
         <div className="fixed inset-0 z-100 lg:hidden">
           <div className="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" onClick={() => setDrawerOpen(false)} />
           <div className="absolute left-0 top-0 bottom-0 w-80 bg-white shadow-2xl flex flex-col overflow-hidden">
-            {/* Drawer header (unchanged) */}
+            {/* Drawer header */}
             <div className="bg-slate-900 px-5 py-4 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center border border-white/20">
-                  <User size={18} className="text-white" />
+                <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center border border-white/20 overflow-hidden shrink-0">
+                  {user ? (
+                    <span className="text-white font-black text-base">{user.name?.[0]?.toUpperCase() ?? "U"}</span>
+                  ) : (
+                    <User size={18} className="text-white" />
+                  )}
                 </div>
                 <div>
-                  <p className="text-white font-semibold text-sm">Hello, Guest</p>
-                  <p className="text-slate-400 text-xs mt-0.5">Sign in for best deals</p>
+                  <p className="text-white font-semibold text-sm">{user ? `Hello, ${user.name}` : "Hello, Guest"}</p>
+                  <p className="text-slate-400 text-xs mt-0.5">{user ? user.email : "Sign in for best deals"}</p>
                 </div>
               </div>
               <button onClick={() => setDrawerOpen(false)} className="p-1.5 rounded-lg hover:bg-white/10 transition-colors">
                 <X size={18} className="text-slate-400" />
               </button>
             </div>
-            <div className="px-4 py-3 bg-pink-50 border-b border-pink-100">
-              <button onClick={() => { router.push("/login"); setDrawerOpen(false); }} className="w-full bg-pink-600 hover:bg-pink-700 text-white py-2.5 rounded-xl text-sm font-semibold transition-colors">
-                Sign In / Register
-              </button>
-            </div>
+
+            {user ? (
+              <div className="px-4 py-3 bg-slate-800 border-b border-slate-700 flex flex-col gap-2">
+                <button onClick={() => { router.push("/orders"); setDrawerOpen(false); }} className="w-full flex items-center gap-2 text-slate-300 hover:text-white text-sm py-1.5 transition-colors">
+                  <ShoppingBag size={15} /> My Orders
+                </button>
+                {user.role === "vendor" && (
+                  <button onClick={() => { router.push("/vendor/vendor-dashboard"); setDrawerOpen(false); }} className="w-full flex items-center gap-2 text-slate-300 hover:text-white text-sm py-1.5 transition-colors">
+                    <LayoutDashboard size={15} /> Vendor Dashboard
+                  </button>
+                )}
+                {user.role === "admin" && (
+                  <button onClick={() => { router.push("/admin"); setDrawerOpen(false); }} className="w-full flex items-center gap-2 text-slate-300 hover:text-white text-sm py-1.5 transition-colors">
+                    <LayoutDashboard size={15} /> Admin Panel
+                  </button>
+                )}
+                <button onClick={handleLogout} className="w-full flex items-center gap-2 text-rose-400 hover:text-rose-300 text-sm font-semibold py-1.5 transition-colors">
+                  <LogOut size={15} /> Sign Out
+                </button>
+              </div>
+            ) : (
+              <div className="px-4 py-3 bg-pink-50 border-b border-pink-100">
+                <button onClick={() => { router.push("/login"); setDrawerOpen(false); }} className="w-full bg-pink-600 hover:bg-pink-700 text-white py-2.5 rounded-xl text-sm font-semibold transition-colors">
+                  Sign In / Register
+                </button>
+              </div>
+            )}
 
             {/* Categories in grid layout — dynamic */}
             <div className="flex-1 overflow-y-auto p-4">

@@ -3,7 +3,18 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
+import { motion, cubicBezier } from "framer-motion";
 import useCategory from "../hooks/useCategory";
+
+const container = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.1 } },
+};
+
+const cardVariant = (i: number) => ({
+  hidden: { opacity: 0, x: i % 2 === 0 ? -60 : 60, y: 20 },
+  show:  { opacity: 1, x: 0, y: 0, transition: { duration: 0.55, ease: cubicBezier(0.25, 0.1, 0.25, 1) } },
+});
 
 type Category = {
   _id: string;
@@ -38,10 +49,22 @@ export default function CategorySection() {
     <section className="py-24 bg-gradient-to-b from-white to-gray-50">
       <div className="max-w-[1400px] mx-auto px-6">
         {/* Header */}
-        <div className="text-center mb-16">
-          <span className="inline-flex items-center px-5 py-2 rounded-full bg-pink-100 text-pink-600 text-sm font-semibold mb-5">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.6, ease: cubicBezier(0.25, 0.1, 0.25, 1) }}
+          className="text-center mb-16"
+        >
+          <motion.span
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="inline-flex items-center px-5 py-2 rounded-full bg-pink-100 text-pink-600 text-sm font-semibold mb-5"
+          >
             Premium Collections
-          </span>
+          </motion.span>
 
           <h1 className="text-5xl font-black text-gray-900">
             Shop By <span className="text-pink-600">Category</span>
@@ -50,13 +73,19 @@ export default function CategorySection() {
           <p className="text-gray-500 text-lg mt-5 max-w-2xl mx-auto">
             Discover toys, games, gifts and learning products for every age.
           </p>
-        </div>
+        </motion.div>
 
         {/* Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {categories.map((category: Category) => (
+        <motion.div
+          variants={container}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-80px" }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+        >
+          {categories.map((category: Category, i: number) => (
+            <motion.div key={category._id} variants={cardVariant(i)} whileHover={{ y: -6, transition: { duration: 0.25 } }}>
             <Link
-              key={category._id}
               href={`/categories/${encodeURIComponent(category.name)}`}
             >
               <div
@@ -67,10 +96,9 @@ export default function CategorySection() {
                   overflow-hidden
                   rounded-[30px]
                   cursor-pointer
-                  transition-all
-                  duration-500
+                  transition-shadow
+                  duration-300
                   shadow-[0_10px_40px_rgba(0,0,0,0.12)]
-                  hover:-translate-y-2
                   hover:shadow-[0_20px_60px_rgba(0,0,0,0.18)]
                 "
               >
@@ -170,8 +198,9 @@ export default function CategorySection() {
                 />
               </div>
             </Link>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

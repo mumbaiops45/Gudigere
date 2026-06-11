@@ -282,3 +282,19 @@ export const getVendorEarnings =
 
     return res.data;
   };
+
+  export const getVendorDashboard =
+  async () => {
+    const res = await API.get(
+      "/orders/vendor/dashboard",
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem(
+            "token"
+          )}`,
+        },
+      }
+    );
+
+    return res.data;
+  };

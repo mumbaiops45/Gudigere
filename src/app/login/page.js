@@ -66,7 +66,7 @@ export default function LoginPage() {
       user.role ===
       "vendor"
     ) {
-      router.push("/vendor");
+      router.push("/vendor/vendor-dashboard");
 
     } else {
       router.push("/");

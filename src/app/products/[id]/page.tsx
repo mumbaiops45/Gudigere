@@ -9,11 +9,15 @@ import {
   Minus,
   Plus,
   Heart,
+  Star,
 } from "lucide-react";
 
 import {
   getSingleProduct,
   Product,
+  Review,
+  getProductReviews,
+  createReview,
 } from "../../../services/productService";
 
 import useCartStore from "../../../store/cartStore";
@@ -31,6 +35,21 @@ import { useRouter } from "next/navigation";
 
 import { toast } from "sonner";
 
+const AVATAR_COLORS = [
+  "bg-pink-500", "bg-purple-500", "bg-blue-500",
+  "bg-green-500", "bg-amber-500", "bg-rose-500", "bg-indigo-500",
+];
+
+function AvatarInitials({ name }: { name: string }) {
+  const initials = name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
+  const color = AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length];
+  return (
+    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 ${color}`}>
+      {initials}
+    </div>
+  );
+}
+
 export default function ProductDetailsPage() {
 
   const params =
@@ -39,7 +58,7 @@ export default function ProductDetailsPage() {
   const router =
     useRouter();
 
-  const { token: storeToken } = useAuthStore();
+  const { token: storeToken, user } = useAuthStore() as { token: string | null; user: any; logout: () => void };
   const token = storeToken || (typeof window !== "undefined" ? localStorage.getItem("token") : null);
 
   const { addToCart } = useCartStore();
@@ -65,6 +84,12 @@ export default function ProductDetailsPage() {
   const [wishlistLoading, setWishlistLoading] =
     useState(false);
 
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewHover, setReviewHover] = useState(0);
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+
   // FETCH PRODUCT
   const fetchProduct =
     async () => {
@@ -88,9 +113,62 @@ export default function ProductDetailsPage() {
       }
     };
 
+  const fetchReviews = async () => {
+    try {
+      const data = await getProductReviews(params.id as string);
+      setReviews(data);
+    } catch {
+      // reviews fail silently
+    }
+  };
+
   useEffect(() => {
     fetchProduct();
+    fetchReviews();
   }, []);
+
+  const handleSubmitReview = async () => {
+    if (!token) {
+      toast.error("Please login to leave a review");
+      router.push("/login");
+      return;
+    }
+    if (reviewRating === 0) {
+      toast.error("Please select a rating");
+      return;
+    }
+    if (!reviewComment.trim()) {
+      toast.error("Please write a comment");
+      return;
+    }
+    setReviewSubmitting(true);
+    try {
+      const saved = await createReview(params.id as string, reviewRating, reviewComment);
+      toast.success("Review submitted!");
+
+      // Optimistic update — show immediately without waiting for re-fetch
+      const optimistic: Review = saved?._id
+        ? saved
+        : {
+            _id: Date.now().toString(),
+            user: { _id: user?._id ?? "", name: user?.name ?? "You" },
+            rating: reviewRating,
+            comment: reviewComment,
+            createdAt: new Date().toISOString(),
+          };
+      setReviews((prev) => [optimistic, ...prev]);
+
+      setReviewRating(0);
+      setReviewComment("");
+
+      // Also sync with server in background
+      fetchReviews();
+    } catch {
+      toast.error("Failed to submit review");
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
 
   // ADD TO CART
   const handleAddToCart = () => {
@@ -368,6 +446,66 @@ export default function ProductDetailsPage() {
 
           </div>
 
+        </div>
+
+      </div>
+
+      {/* REVIEWS */}
+      <div className="max-w-4xl mx-auto px-4 mt-12 mb-12">
+
+        <h2 className="text-xl font-black text-gray-900 mb-5">Customer Reviews</h2>
+
+        {/* REVIEW LIST */}
+        <div className="space-y-3 mb-6">
+          {reviews.length === 0 ? (
+            <p className="text-gray-400 text-sm">No reviews yet. Be the first!</p>
+          ) : (
+            reviews.map((r) => (
+              <div key={r._id} className="flex gap-3 p-3 rounded-xl border border-pink-100 bg-pink-50/30">
+                <AvatarInitials name={r.user?.name ?? "U"} />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="font-semibold text-gray-900 text-sm">{r.user?.name ?? "User"}</span>
+                    <div className="flex gap-0.5">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <Star key={s} size={12} className={s <= r.rating ? "fill-amber-400 text-amber-400" : "text-gray-200 fill-gray-200"} />
+                      ))}
+                    </div>
+                    <span className="text-xs text-gray-400 ml-auto">{new Date(r.createdAt).toLocaleDateString()}</span>
+                  </div>
+                  <p className="text-gray-500 text-sm">{r.comment}</p>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* ADD REVIEW FORM */}
+        <div className="border border-pink-200 rounded-xl p-4 bg-pink-50/20">
+          <p className="text-sm font-bold text-gray-700 mb-2">Write a Review</p>
+          <div className="flex gap-0.5 mb-3">
+            {[1, 2, 3, 4, 5].map((s) => (
+              <button key={s} onClick={() => setReviewRating(s)} onMouseEnter={() => setReviewHover(s)} onMouseLeave={() => setReviewHover(0)}>
+                <Star size={22} className={s <= (reviewHover || reviewRating) ? "fill-amber-400 text-amber-400" : "text-gray-200 fill-gray-200"} />
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <textarea
+              value={reviewComment}
+              onChange={(e) => setReviewComment(e.target.value)}
+              placeholder="Share your experience..."
+              rows={2}
+              className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 resize-none focus:outline-none focus:ring-2 focus:ring-pink-300"
+            />
+            <button
+              onClick={handleSubmitReview}
+              disabled={reviewSubmitting}
+              className="px-5 rounded-lg bg-pink-600 hover:bg-pink-700 disabled:opacity-50 text-white font-bold text-sm transition-all"
+            >
+              {reviewSubmitting ? "..." : "Post"}
+            </button>
+          </div>
         </div>
 
       </div>

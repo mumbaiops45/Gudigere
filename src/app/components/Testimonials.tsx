@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, ChevronLeft, ChevronRight, Quote, Zap } from "lucide-react";
+import API from "../../services/api";
 
 // Types
 interface Testimonial {
@@ -17,6 +18,21 @@ interface Testimonial {
   productName?: string;
   isVerified: boolean;
   date: string;
+}
+
+const AVATAR_COLORS = [
+  "bg-pink-500", "bg-purple-500", "bg-blue-500",
+  "bg-green-500", "bg-amber-500", "bg-rose-500", "bg-indigo-500",
+];
+
+function AvatarInitials({ name, size = "w-10 h-10" }: { name: string; size?: string }) {
+  const initials = name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
+  const color = AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length];
+  return (
+    <div className={`${size} rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 ${color}`}>
+      {initials}
+    </div>
+  );
 }
 
 // Helper: render stars
@@ -47,7 +63,7 @@ function TestimonialCard({ testimonial, index }: { testimonial: Testimonial; ind
       viewport={{ once: true }}
       transition={{ delay: index * 0.1, duration: 0.4 }}
       whileHover={{ y: -5 }}
-      className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all"
+      className="bg-white rounded-2xl shadow-lg p-6 border border-pink-100 hover:border-pink-300 hover:shadow-xl transition-all"
     >
       {/* Quote Icon */}
       <Quote size={28} className="text-pink-200 mb-3" />
@@ -64,15 +80,19 @@ function TestimonialCard({ testimonial, index }: { testimonial: Testimonial; ind
 
       {/* User Info */}
       <div className="flex items-center gap-3">
-        <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-200">
-          <Image
-            src={testimonial.avatar || "/avatar-placeholder.png"}
-            alt={testimonial.name}
-            fill
-            sizes="40px"
-            className="object-cover"
-          />
-        </div>
+        {testimonial.avatar ? (
+          <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-200 shrink-0">
+            <Image
+              src={testimonial.avatar}
+              alt={testimonial.name}
+              fill
+              sizes="40px"
+              className="object-cover"
+            />
+          </div>
+        ) : (
+          <AvatarInitials name={testimonial.name} />
+        )}
         <div>
           <h4 className="font-bold text-gray-900 text-sm">{testimonial.name}</h4>
           <div className="flex items-center gap-2">
@@ -155,94 +175,31 @@ export default function Testimonials() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
-    // Check screen size for carousel vs grid
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener("resize", checkMobile);
 
-    // Fetch testimonials from API
     const fetchTestimonials = async () => {
       try {
-        // Replace with your actual API call
-        // const res = await API.get("/reviews");
-        // setTestimonials(res.data);
-
-        // Mock data – replace with real data from backend
-        setTimeout(() => {
-          setTestimonials([
-            {
-              _id: "1",
-              name: "Priya Sharma",
-              location: "Mumbai",
-              rating: 5,
-              comment: "Ordered the LEGO set for my son's birthday. Arrived early and he absolutely loved it! The quality is superb.",
-              avatar: "https://randomuser.me/api/portraits/women/1.jpg",
-              productName: "LEGO Classic Box",
-              isVerified: true,
-              date: "2024-01-15",
-            },
-            {
-              _id: "2",
-              name: "Rahul Mehta",
-              location: "Delhi",
-              rating: 5,
-              comment: "Best toy store ever! My daughter is obsessed with the stuffed unicorn. Great packing and fast delivery.",
-              avatar: "https://randomuser.me/api/portraits/men/2.jpg",
-              productName: "Unicorn Plush Toy",
-              isVerified: true,
-              date: "2024-01-10",
-            },
-            {
-              _id: "3",
-              name: "Anjali Nair",
-              location: "Bangalore",
-              rating: 4,
-              comment: "The remote car is amazing value for money. My nephew played with it for hours. Will definitely buy again.",
-              avatar: "https://randomuser.me/api/portraits/women/3.jpg",
-              productName: "RC Stunt Car",
-              isVerified: true,
-              date: "2024-01-05",
-            },
-            {
-              _id: "4",
-              name: "Vikram Singh",
-              location: "Jaipur",
-              rating: 5,
-              comment: "I'm impressed with the STEM robot kit. My 10-year-old learned so much. Highly recommended!",
-              avatar: "https://randomuser.me/api/portraits/men/4.jpg",
-              productName: "Solar Robot Kit",
-              isVerified: true,
-              date: "2024-01-02",
-            },
-            {
-              _id: "5",
-              name: "Neha Gupta",
-              location: "Pune",
-              rating: 5,
-              comment: "Customer service is top-notch. They helped me choose the perfect gift. My kids love the art set!",
-              avatar: "https://randomuser.me/api/portraits/women/5.jpg",
-              productName: "Deluxe Art Set",
-              isVerified: true,
-              date: "2023-12-28",
-            },
-            {
-              _id: "6",
-              name: "Amit Patel",
-              location: "Ahmedabad",
-              rating: 4.5,
-              comment: "Great collection of board games. Shipping was quick and the products were in perfect condition.",
-              avatar: "https://randomuser.me/api/portraits/men/6.jpg",
-              productName: "Family Board Game",
-              isVerified: true,
-              date: "2023-12-20",
-            },
-          ]);
-          setLoading(false);
-        }, 800);
-      } catch (error) {
-        console.error("Failed to fetch testimonials:", error);
+        const res = await API.get("/products/reviews/all");
+        const mapped = (res.data as any[]).map((r) => ({
+          _id: r._id,
+          name: r.user?.name ?? "Customer",
+          location: r.user?.location ?? "",
+          rating: r.rating,
+          comment: r.comment,
+          avatar: r.user?.avatar ?? "",
+          productName: r.product?.title ?? "",
+          isVerified: true,
+          date: r.createdAt,
+        }));
+        setTestimonials(mapped);
+      } catch {
+        // fallback to empty — no stale mock data
+      } finally {
         setLoading(false);
       }
     };
@@ -310,22 +267,27 @@ export default function Testimonials() {
 
         {/* Testimonials Display */}
         {isMobile ? (
-          <TestimonialCarousel testimonials={testimonials} />
+          <TestimonialCarousel testimonials={showAll ? testimonials : testimonials.slice(0, 3)} />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {testimonials.map((testimonial, idx) => (
+            {(showAll ? testimonials : testimonials.slice(0, 3)).map((testimonial, idx) => (
               <TestimonialCard key={testimonial._id} testimonial={testimonial} index={idx} />
             ))}
           </div>
         )}
 
         {/* View All Button */}
-        <motion.div {...fadeUp(0.2)} className="text-center mt-12">
-          <button className="inline-flex items-center gap-2 border-2 border-pink-600 text-pink-600 hover:bg-pink-600 hover:text-white font-bold py-3 px-8 rounded-full transition-all duration-300">
-            Read All Reviews
-            <ChevronRight size={18} />
-          </button>
-        </motion.div>
+        {testimonials.length > 3 && (
+          <motion.div {...fadeUp(0.2)} className="text-center mt-12">
+            <button
+              onClick={() => setShowAll((prev) => !prev)}
+              className="inline-flex items-center gap-2 border-2 border-pink-600 text-pink-600 hover:bg-pink-600 hover:text-white font-bold py-3 px-8 rounded-full transition-all duration-300"
+            >
+              {showAll ? "Show Less" : "Read All Reviews"}
+              <ChevronRight size={18} className={`transition-transform ${showAll ? "rotate-90" : ""}`} />
+            </button>
+          </motion.div>
+        )}
       </div>
     </section>
   );

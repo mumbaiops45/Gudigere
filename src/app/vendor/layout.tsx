@@ -10,11 +10,11 @@ import {
 } from "lucide-react";
 
 const navItems = [
-  { href: "/vendor",              icon: LayoutDashboard, label: "Dashboard"    },
+  { href: "/vendor/vendor-dashboard",              icon: LayoutDashboard, label: "Dashboard"    },
   { href: "/vendor/add-product",  icon: PlusSquare,      label: "Add Product"  },
-  { href: "/vendor/products",     icon: Package,         label: "My Products"  },
+  { href: "/vendor/my-products",     icon: Package,         label: "My Products"  },
   { href: "/vendor/orders",       icon: ShoppingCart,    label: "Orders"       },
-  { href: "/vendor/earnings",     icon: IndianRupee,     label: "Earnings"     },
+  // { href: "/vendor/earnings",     icon: IndianRupee,     label: "Earnings"     },
   { href: "/vendor/profile",      icon: User,            label: "Profile"      },
 ];
 
