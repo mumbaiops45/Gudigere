@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ShoppingCart, Heart, LogIn, UserPlus, Lock } from "lucide-react";
@@ -19,13 +21,16 @@ const messages = {
 export default function LoginPromptModal({ open, onClose, action = "cart" }: Props) {
   const router = useRouter();
   const { icon: Icon, title, sub } = messages[action];
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
 
   const go = (path: string) => {
     onClose();
     router.push(path);
   };
 
-  return (
+  const content = (
     <AnimatePresence>
       {open && (
         <>
@@ -107,4 +112,7 @@ export default function LoginPromptModal({ open, onClose, action = "cart" }: Pro
       )}
     </AnimatePresence>
   );
+
+  if (!mounted) return null;
+  return createPortal(content, document.body);
 }
