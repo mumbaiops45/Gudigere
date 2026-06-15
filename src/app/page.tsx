@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import Hero from "../components/Hero";
+
+export const metadata: Metadata = {
+  title: "GudiGear – India's Toy Marketplace | Shop Toys Online",
+  description:
+    "Discover thousands of toys for every age at GudiGear. Shop LEGO, RC cars, action figures, board games, soft toys & more. Fast delivery across India.",
+};
 import ScrollReveal from "../components/ScrollReveal";
 import CategorySection from "@/components/CategorySection";
 import FeaturedProducts from "./components/FeaturedProducts";

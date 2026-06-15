@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronLeft, PackageSearch } from "lucide-react";
 
@@ -6,6 +7,15 @@ import CategoryProductCard from "./CategoryProductCard";
 
 interface Props {
   params: Promise<{ category: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { category } = await params;
+  const name = decodeURIComponent(category);
+  return {
+    title: `${name} Toys | GudiGear`,
+    description: `Shop the best ${name} toys and games at GudiGear. Great prices, fast delivery, and a wide selection for every age group.`,
+  };
 }
 
 export default async function CategoryProductsPage({ params }: Props) {

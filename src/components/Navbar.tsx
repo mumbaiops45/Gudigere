@@ -713,7 +713,8 @@ export default function Navbar() {
   const { user, logout } = useAuthStore() as { user: any; logout: () => void };
   const { categories } = useCategory();
 
-  const cartItems = useCartStore((s: { cartItems: unknown[] }) => s.cartItems);
+  const cartItems = useCartStore((s: { cartItems: unknown[]; clearCart: () => void }) => s.cartItems);
+  const clearCart = useCartStore((s: { cartItems: unknown[]; clearCart: () => void }) => s.clearCart);
   const cartCount = cartItems.reduce((sum: number, item: unknown) => sum + ((item as { quantity?: number }).quantity ?? 1), 0);
   const wishlistCount = useWishlistStore((s) => s.wishlistItems.length);
 
@@ -768,6 +769,7 @@ export default function Navbar() {
 
   const handleLogout = () => {
     logout();
+    clearCart();
     setUserMenuOpen(false);
     setDrawerOpen(false);
     router.push("/");

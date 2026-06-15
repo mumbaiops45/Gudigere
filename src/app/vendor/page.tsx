@@ -298,12 +298,18 @@
 //   );
 // }
 
-import React from 'react'
+import type { Metadata } from "next";
+import React from "react";
+
+export const metadata: Metadata = {
+  title: "Vendor Login | GudiGear",
+  description:
+    "Log in to your GudiGear vendor account to manage your products, track orders, and grow your toy business.",
+  robots: { index: false },
+};
 
 const page = () => {
-  return (
-    <div>page</div>
-  )
-}
+  return <div>page</div>;
+};
 
-export default page
+export default page;
