@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { getBanners, trackBannerClick, Banner } from "../services/bannerService";
+
 const quickCats = [
   { icon: "🚗", label: "Remote Cars" },
   { icon: "🧸", label: "Soft Toys" },
@@ -15,101 +17,69 @@ const quickCats = [
   { icon: "🎨", label: "Art & Craft" },
 ];
 
-const slides = [
-  {
-    image:
-      "/hero.jpg",
-
-    title: "Amazing Toys",
-
-    subtitle: "For Every Kid!",
-
-    card1: {
-      img:"/card1.jpg",
-
-      name: "RC Cars Collection",
-
-      badge: "Up to 40% OFF",
-
-      badgeColor: "text-pink-600",
-    },
-
-    card2: {
-      img:"/teddy.jpg",
-
-      name: "Teddy Bears",
-
-      badge: "Best Seller ★",
-
-      badgeColor: "text-green-600",
-    },
-  },
-
-  {
-    image:
-      "/hero2.jpg",
-
-    title: "Fun Learning",
-
-    subtitle: "Educational Toys",
-
-    card1: {
-      img: "/card2.jpg",
-
-      name: "LEGO Sets",
-
-      badge: "New Arrivals",
-
-      badgeColor: "text-blue-600",
-    },
-
-    card2: {
-      img:
-        "/science.jpg",
-      name: "Science Kits",
-
-      badge: "Top Rated ★",
-
-      badgeColor: "text-yellow-600",
-    },
-  },
-
-  {
-    image:
-      "/hero3.jpg",
-
-    title: "Cute Collections",
-
-    subtitle: "Soft Toys & Dolls",
-
-    card1: {
-      img: "/card3.jpg",
-      name: "Plush Toys",
-
-      badge: "Kids Favourite",
-
-      badgeColor: "text-purple-600",
-    },
-
-    card2: {
-      img: "/dollhouse.jpg",
-      name: "Doll House",
-
-      badge: "30% OFF Today",
-
-      badgeColor: "text-pink-600",
-    },
-  },
+/* ── static fallback slides (used when API returns nothing) ── */
+const staticSlides: Banner[] = [
+  { _id: "static-1", image: "/hero.jpg",  title: "Amazing Toys",     subtitle: "For Every Kid!",      link: "/products", active: true, placement: "Home Hero", clicks: 0 },
+  { _id: "static-2", image: "/hero2.jpg", title: "Fun Learning",     subtitle: "Educational Toys",    link: "/products", active: true, placement: "Home Hero", clicks: 0 },
+  { _id: "static-3", image: "/hero3.jpg", title: "Cute Collections", subtitle: "Soft Toys & Dolls",  link: "/products", active: true, placement: "Home Hero", clicks: 0 },
 ];
+
+/* ── skeleton loader ── */
+function HeroSkeleton() {
+  return (
+    <div className="bg-[#f1f3f6] overflow-hidden">
+      <div className="relative h-80 sm:h-130 overflow-hidden bg-slate-200 animate-pulse">
+        <div className="absolute inset-0 bg-linear-to-r from-slate-300/80 via-slate-200/50 to-transparent" />
+        <div className="relative z-10 h-full flex items-center">
+          <div className="max-w-375 mx-auto w-full px-5 sm:px-8 lg:px-14 space-y-4">
+            <div className="h-5 w-40 rounded-full bg-slate-300" />
+            <div className="h-12 w-72 rounded-xl bg-slate-300" />
+            <div className="h-8 w-56 rounded-xl bg-slate-300" />
+            <div className="flex gap-3 mt-4">
+              <div className="h-11 w-32 rounded-md bg-slate-300" />
+              <div className="h-11 w-28 rounded-md bg-slate-300" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Hero() {
   const router = useRouter();
+  const [slides, setSlides] = useState<Banner[]>([]);
   const [current, setCurrent] = useState(0);
+  const [loading, setLoading] = useState(true);
 
+  /* fetch hero banners on mount */
   useEffect(() => {
+    getBanners("Home Hero")
+      .then((data) => {
+        const active = data.filter((b) => b.active);
+        setSlides(active.length > 0 ? active : staticSlides);
+      })
+      .catch(() => setSlides(staticSlides))
+      .finally(() => setLoading(false));
+  }, []);
+
+  /* auto-advance */
+  useEffect(() => {
+    if (slides.length <= 1) return;
     const iv = setInterval(() => setCurrent((p) => (p + 1) % slides.length), 4000);
     return () => clearInterval(iv);
-  }, []);
+  }, [slides.length]);
+
+  const handleCTA = (slide: Banner) => {
+    if (!slide._id.startsWith("static-")) {
+      trackBannerClick(slide._id).catch(() => {});
+    }
+    router.push(slide.link || "/products");
+  };
+
+  if (loading) return <HeroSkeleton />;
+
+  const slide = slides[current];
 
   return (
     <div className="bg-[#f1f3f6] overflow-hidden">
@@ -120,68 +90,43 @@ export default function Hero() {
         {/* Sliding background */}
         <AnimatePresence mode="wait">
           <motion.div
-            key={current}
+            key={slide._id}
             initial={{ opacity: 0, scale: 1.06 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.9 }}
             className="absolute inset-0"
           >
-            <Image src={slides[current].image} alt={slides[current].title} fill priority sizes="100vw" className="object-cover" />
+            <Image
+              src={slide.image}
+              alt={slide.title}
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover"
+            />
           </motion.div>
         </AnimatePresence>
 
         {/* Dark overlay */}
         <div className="absolute inset-0 bg-linear-to-r from-black/80 via-black/50 to-transparent" />
 
-        {/* Floating product cards — desktop only */}
-        <motion.div
-          animate={{ y: [0, -10, 0] }}
-          transition={{ duration: 4, repeat: Infinity }}
-          className="hidden lg:block absolute top-16 right-24 z-10"
-        >
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`card1-${current}`}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.5 }}
-            >
-              <div className="bg-white rounded-2xl shadow-2xl p-3 w-40">
-                <div className="relative h-28 rounded-xl overflow-hidden">
-                  <Image src={slides[current].card1.img} alt={slides[current].card1.name} fill sizes="160px" loading="eager" className="object-cover" />
-                </div>
-                <p className="font-bold text-sm mt-2.5 text-gray-900">{slides[current].card1.name}</p>
-                <p className={`text-xs font-semibold mt-0.5 ${slides[current].card1.badgeColor}`}>{slides[current].card1.badge}</p>
-              </div>
-            </motion.div>
-          </AnimatePresence>
-        </motion.div>
-
-        <motion.div
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 5, repeat: Infinity }}
-          className="hidden lg:block absolute bottom-20 right-56 z-10"
-        >
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`card2-${current}`}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-            >
-              <div className="bg-white rounded-2xl shadow-2xl p-3 w-40">
-                <div className="relative h-28 rounded-xl overflow-hidden">
-                  <Image src={slides[current].card2.img} alt={slides[current].card2.name} fill sizes="160px" loading="eager" className="object-cover" />
-                </div>
-                <p className="font-bold text-sm mt-2.5 text-gray-900">{slides[current].card2.name}</p>
-                <p className={`text-xs font-semibold mt-0.5 ${slides[current].card2.badgeColor}`}>{slides[current].card2.badge}</p>
-              </div>
-            </motion.div>
-          </AnimatePresence>
-        </motion.div>
+        {/* Slide indicator dots */}
+        {slides.length > 1 && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+            {slides.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrent(i)}
+                className={`transition-all duration-300 rounded-full ${
+                  i === current
+                    ? "w-6 h-2 bg-pink-500"
+                    : "w-2 h-2 bg-white/40 hover:bg-white/70"
+                }`}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Content */}
         <div className="relative z-10 h-full flex items-center">
@@ -189,7 +134,7 @@ export default function Hero() {
 
             <AnimatePresence mode="wait">
               <motion.div
-                key={current}
+                key={slide._id}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
@@ -203,8 +148,12 @@ export default function Hero() {
 
                 {/* Heading */}
                 <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white leading-tight">
-                  {slides[current].title}
-                  <span className="block text-gradient-warm">{slides[current].subtitle}</span>
+                  {slide.title}
+                  {(slide.subtitle || slide.description) && (
+                    <span className="block text-gradient-warm">
+                      {slide.subtitle || slide.description}
+                    </span>
+                  )}
                 </h1>
 
                 {/* Subtext */}
@@ -218,7 +167,7 @@ export default function Hero() {
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
-                    onClick={() => router.push("/products")}
+                    onClick={() => handleCTA(slide)}
                     className="btn-shine bg-pink-600 hover:bg-black text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-md font-bold text-sm transition-colors shadow-lg"
                   >
                     Shop Now →

@@ -1,233 +1,250 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { ShoppingCart, Zap, Truck, RotateCcw, Shield } from "lucide-react";
-import MagneticButton from "./MagneticButton";
+import { motion, AnimatePresence } from "framer-motion";
+import { Copy, Check, Tag, Clock, Users, CalendarDays, Zap, ShoppingBag } from "lucide-react";
+import { getActiveCoupons, type Coupon } from "../services/couponService";
+import { useRouter } from "next/navigation";
 
-/* stagger helper */
-const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 22 },
-  whileInView: { opacity: 1, y: 0 },
-  transition: { duration: 0.5, delay, ease: [0.16, 1, 0.3, 1] as const },
-  viewport: { once: true },
-});
 
-export default function DealsSection() {
-  const target = new Date("2026-12-31").getTime();
-  const calc = () => {
-    const d = target - Date.now();
-    if (d <= 0) return { h: 0, m: 0, s: 0 };
+/* ── countdown hook ── */
+type Countdown = { d: number; h: number; m: number; s: number } | null;
+
+function useCountdown(endDate?: string | null): Countdown {
+  const calc = (): Countdown => {
+    if (!endDate) return null;
+    const d = new Date(endDate).getTime() - Date.now();
+    if (d <= 0) return { d: 0, h: 0, m: 0, s: 0 };
     return {
+      d: Math.floor(d / 86_400_000),
       h: Math.floor((d / 3_600_000) % 24),
       m: Math.floor((d / 60_000) % 60),
       s: Math.floor((d / 1000) % 60),
     };
   };
-  const [t, setT] = useState(calc());
+  const [t, setT] = useState<Countdown>(calc);
   useEffect(() => {
+    if (!endDate) return;
     const iv = setInterval(() => setT(calc()), 1000);
     return () => clearInterval(iv);
-  }, []);
+  }, [endDate]);
+  return t;
+}
+
+/* ── copy button ── */
+function CopyButton({ code }: { code: string }) {
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    navigator.clipboard.writeText(code).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+  return (
+    <button
+      onClick={copy}
+      className="flex items-center gap-2 bg-pink-600 hover:bg-pink-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all active:scale-95 shadow-md"
+    >
+      <AnimatePresence mode="wait">
+        {copied ? (
+          <motion.span key="check" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} className="flex items-center gap-1.5">
+            <Check size={15} /> Copied!
+          </motion.span>
+        ) : (
+          <motion.span key="copy" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} className="flex items-center gap-1.5">
+            <Copy size={15} /> Copy Code
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </button>
+  );
+}
+
+/* ── single coupon card ── */
+function CouponCard({ coupon, index }: { coupon: Coupon; index: number }) {
+  const timer = useCountdown(coupon.endDate);
+  const usagePct = coupon.usageLimit ? Math.min((coupon.usedCount / coupon.usageLimit) * 100, 100) : 0;
   const pad = (n: number) => String(n).padStart(2, "0");
 
   return (
-    <section className="section-card overflow-hidden">
-      <div className="max-w-7xl mx-auto">
-
-      {/* ── HEADER ── */}
-      <div className="flex flex-wrap items-center gap-3 sm:gap-6
-        px-4 sm:px-6 lg:px-8 py-4 bg-slate-900 border-b border-white/5">
-
-        <div className="flex items-center gap-2">
-          <motion.span
-            animate={{ scale: [1, 1.3, 1], opacity: [1, 0.7, 1] }}
-            transition={{ duration: 1.2, repeat: Infinity }}
-            className="text-amber-400 text-base"
-          >
-            ⚡
-          </motion.span>
-          <h2 className="font-bold text-sm sm:text-base">
-            <span className="text-white">Deal of the</span>{" "}
-            <span className="text-amber-400">Day</span>
-          </h2>
-        </div>
-
-        {/* Countdown — each digit flips on change */}
-        <div className="flex items-center gap-1.5">
-          {[
-            { l: "HRS", v: t.h },
-            { l: "MIN", v: t.m },
-            { l: "SEC", v: t.s },
-          ].map(({ l, v }, i) => (
-            <span key={l} className="flex items-center gap-1">
-              <motion.span
-                key={`${l}-${v}`}
-                initial={{ y: -8, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.22 }}
-                className="block bg-pink-600 text-white font-black text-xs sm:text-sm
-                  px-2.5 py-1 rounded-lg tabular-nums min-w-9 text-center shadow-sm"
-              >
-                {pad(v)}
-              </motion.span>
-              <span className="text-slate-500 text-[10px] font-bold">{l}</span>
-              {i < 2 && <span className="text-slate-600 font-bold px-0.5">:</span>}
-            </span>
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] as [number,number,number,number] }}
+      whileHover={{ y: -4 }}
+      className="flex flex-col sm:flex-row bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden transition-shadow hover:shadow-xl"
+    >
+      {/* ── left discount panel ── */}
+      <div className="relative sm:w-36 bg-pink-600 flex flex-col items-center justify-center p-5 shrink-0">
+        {/* perforation dots */}
+        <div className="hidden sm:flex absolute right-0 top-0 bottom-0 flex-col justify-between py-3 translate-x-1/2 z-10">
+          {Array.from({ length: 7 }).map((_, i) => (
+            <div key={i} className="w-3 h-3 rounded-full bg-slate-100 border border-slate-200" />
           ))}
         </div>
-
-        <span className="ml-auto hidden sm:flex items-center gap-1.5
-          text-xs text-slate-400">
-          <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-          Only 14 left in stock!
-        </span>
+        <motion.div
+          animate={{ scale: [1, 1.05, 1] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="text-white text-center"
+        >
+          <p className="text-4xl font-black leading-none">
+            {coupon.discountType === "percentage" ? `${coupon.discount}%` : `₹${coupon.discount}`}
+          </p>
+          <p className="text-pink-200 text-xs font-bold uppercase tracking-widest mt-1">OFF</p>
+        </motion.div>
+        {coupon.discountType === "percentage" && coupon.maxDiscount && (
+          <p className="text-pink-200 text-[10px] mt-2 text-center">
+            Max ₹{coupon.maxDiscount}
+          </p>
+        )}
       </div>
 
-      {/* ── BODY ── */}
-      <div className="flex flex-col lg:flex-row">
+      {/* ── right details panel ── */}
+      <div className="flex-1 p-5 flex flex-col gap-3">
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <div>
+            <h3 className="font-bold text-slate-900 text-base leading-tight">{coupon.title}</h3>
+            {coupon.description && (
+              <p className="text-slate-500 text-xs mt-1 leading-relaxed line-clamp-2">{coupon.description}</p>
+            )}
+          </div>
+          {/* code badge */}
+          <div className="flex items-center gap-1.5 bg-pink-50 border border-dashed border-pink-300 rounded-lg px-3 py-1.5 shrink-0">
+            <Tag size={12} className="text-pink-500" />
+            <span className="font-black text-pink-700 text-sm tracking-widest">{coupon.code}</span>
+          </div>
+        </div>
 
-        {/* Image panel — slides in from left */}
-        <motion.div
-          initial={{ opacity: 0, x: -40 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
-          viewport={{ once: true }}
-          className="relative lg:w-2/5 bg-slate-50 flex items-center
-            justify-center p-10 sm:p-14 lg:p-16 min-h-56 sm:min-h-80"
-        >
-          {/* Floating product image */}
-          <motion.img
-            src="https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?q=80&w=800"
-            alt="Deal product"
-            animate={{ y: [0, -12, 0] }}
-            transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
-            whileHover={{ scale: 1.06 }}
-            className="h-44 sm:h-64 lg:h-72 object-contain drop-shadow-2xl
-              cursor-pointer will-change-transform"
-          />
-
-          {/* Discount badge — pulse */}
-          <motion.span
-            animate={{ scale: [1, 1.08, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="absolute top-4 left-4 bg-pink-600 text-white font-black
-              text-sm px-4 py-1.5 rounded-full shadow-lg pulse-glow"
-          >
-            50% OFF
-          </motion.span>
-
-          {/* Soft radial glow behind product */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_55%,rgba(219,39,119,.08),transparent_65%)]
-            pointer-events-none" />
-        </motion.div>
-
-        {/* Info panel — staggered children */}
-        <div className="flex-1 px-6 sm:px-10 lg:px-12 py-8 sm:py-10
-          lg:py-12 flex flex-col justify-center">
-
-          <motion.span
-            {...fadeUp(0.05)}
-            className="inline-flex items-center gap-1.5 text-[10px] font-bold
-              text-pink-600 bg-pink-50 border border-pink-200 px-3 py-1
-              rounded-full w-fit mb-4 uppercase tracking-widest"
-          >
-            ⚡ Limited Time Offer
-          </motion.span>
-
-          <motion.h3
-            {...fadeUp(0.12)}
-            className="text-xl sm:text-2xl lg:text-3xl font-bold
-              text-slate-900 leading-tight"
-          >
-            Remote Control Racing Car
-          </motion.h3>
-
-          <motion.p
-            {...fadeUp(0.19)}
-            className="mt-2 text-slate-500 text-sm leading-relaxed
-              hidden sm:block max-w-md"
-          >
-            Award-winning RC car with precision controls, 30+ min battery
-            life, and top speed of 25 km/h. Perfect for ages 6–14.
-          </motion.p>
-
-          <motion.div
-            {...fadeUp(0.24)}
-            className="flex items-center gap-3 mt-4"
-          >
-            <div className="flex gap-0.5">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <motion.span
-                  key={i}
-                  initial={{ opacity: 0, scale: 0 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.28 + i * 0.06, duration: 0.3 }}
-                  viewport={{ once: true }}
-                  className="text-amber-400 text-sm"
-                >
-                  ★
-                </motion.span>
-              ))}
-            </div>
-            <span className="text-sm text-slate-500 font-medium">
-              4.8 · 1,248 reviews
+        {/* meta row */}
+        <div className="flex flex-wrap gap-3 text-xs text-slate-500">
+          {coupon.minPrice > 0 && (
+            <span className="flex items-center gap-1">
+              <ShoppingBag size={11} className="text-slate-400" />
+              Min. order ₹{coupon.minPrice}
             </span>
-          </motion.div>
-
-          <motion.div
-            {...fadeUp(0.3)}
-            className="flex items-baseline gap-3 mt-5 flex-wrap"
-          >
-            <span className="text-3xl sm:text-4xl font-black text-slate-900">
-              ₹1,499
+          )}
+          {coupon.days.length > 0 && (
+            <span className="flex items-center gap-1">
+              <CalendarDays size={11} className="text-slate-400" />
+              {coupon.days.slice(0, 3).join(", ")}{coupon.days.length > 3 ? "…" : ""}
             </span>
-            <span className="text-lg line-through text-slate-400">₹2,999</span>
-            <span className="text-sm font-bold text-emerald-700 bg-emerald-50
-              px-2.5 py-0.5 rounded-full">
-              50% off
+          )}
+          {coupon.startTime && coupon.endTime && (
+            <span className="flex items-center gap-1">
+              <Clock size={11} className="text-slate-400" />
+              {coupon.startTime} – {coupon.endTime}
             </span>
-          </motion.div>
+          )}
+          {coupon.usageLimit && (
+            <span className="flex items-center gap-1">
+              <Users size={11} className="text-slate-400" />
+              {coupon.usedCount}/{coupon.usageLimit} used
+            </span>
+          )}
+        </div>
 
-          <motion.div
-            {...fadeUp(0.36)}
-            className="flex flex-wrap gap-3 mt-4"
-          >
-            {[
-              { icon: Truck,     text: "Free Delivery Tomorrow", color: "text-emerald-600" },
-              { icon: RotateCcw, text: "7-Day Easy Return",      color: "text-blue-500"   },
-              { icon: Shield,    text: "1 Year Warranty",         color: "text-purple-500" },
-            ].map(({ icon: Icon, text, color }) => (
-              <span key={text}
-                className="flex items-center gap-1.5 text-xs text-slate-600
-                  bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full"
-              >
-                <Icon size={12} className={`${color} shrink-0`} />
-                {text}
+        {/* usage bar */}
+        {coupon.usageLimit && (
+          <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+            <motion.div
+              initial={{ width: 0 }}
+              whileInView={{ width: `${usagePct}%` }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="h-full bg-pink-500 rounded-full"
+            />
+          </div>
+        )}
+
+        {/* countdown + copy */}
+        <div className="flex flex-wrap items-center justify-between gap-3 mt-auto pt-1">
+          {timer ? (
+            <div className="flex items-center gap-1.5 text-xs text-slate-500">
+              <Clock size={12} className="text-pink-500" />
+              Expires in:
+              <span className="font-black text-slate-800 tabular-nums">
+                {timer.d > 0 ? `${timer.d}d ` : ""}{pad(timer.h)}h {pad(timer.m)}m {pad(timer.s)}s
               </span>
-            ))}
-          </motion.div>
-
-          <motion.div
-            {...fadeUp(0.42)}
-            className="flex flex-wrap gap-3 mt-6 sm:mt-7"
-          >
-            <MagneticButton className="btn-base btn-dark px-7 sm:px-9 py-3
-              rounded-xl font-semibold text-sm flex items-center gap-2 shadow-sm">
-              <ShoppingCart size={15} /> Add to Cart
-            </MagneticButton>
-
-            <MagneticButton className="btn-base btn-pink px-7 sm:px-9 py-3
-              rounded-xl font-semibold text-sm flex items-center gap-2
-              shadow-[0_4px_14px_rgba(219,39,119,.35)]">
-              <Zap size={15} /> Buy Now
-            </MagneticButton>
-          </motion.div>
-
+            </div>
+          ) : (
+            <span className="text-xs text-emerald-600 font-semibold">✓ Always valid</span>
+          )}
+          <CopyButton code={coupon.code} />
         </div>
       </div>
+    </motion.div>
+  );
+}
+
+/* ── main section ── */
+export default function DealsSection() {
+  const router = useRouter();
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getActiveCoupons()
+      .then((data) => setCoupons(data))
+      .catch(() => setCoupons([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  return (
+    <section className="bg-slate-50 py-12 sm:py-16">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* ── header ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="flex flex-wrap items-center justify-between gap-4 mb-8"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-pink-600 flex items-center justify-center shadow-md">
+              <motion.div
+                animate={{ rotate: [0, -10, 10, -5, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 3 }}
+              >
+                <Zap size={18} className="text-white" />
+              </motion.div>
+            </div>
+            <div>
+              <h2 className="text-xl sm:text-2xl font-black text-slate-900">Hot Coupons & Offers</h2>
+              <p className="text-slate-500 text-xs">Copy a code · use at checkout · save instantly</p>
+            </div>
+          </div>
+          <button
+            onClick={() => router.push("/coupons")}
+            className="text-sm font-semibold text-pink-600 hover:text-pink-700 transition-colors"
+          >
+            View all →
+          </button>
+        </motion.div>
+
+        {/* ── coupon list ── */}
+        {loading ? (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-28 rounded-2xl bg-slate-200 animate-pulse" />
+            ))}
+          </div>
+        ) : coupons.length === 0 ? (
+          <div className="text-center py-16 text-slate-400">
+            <Tag size={36} className="mx-auto mb-3 text-slate-300" />
+            <p className="font-semibold text-slate-500">No active coupons right now</p>
+            <p className="text-sm mt-1">Check back soon for exclusive deals!</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {coupons.map((c, i) => (
+              <CouponCard key={c._id} coupon={c} index={i} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
 }
-
