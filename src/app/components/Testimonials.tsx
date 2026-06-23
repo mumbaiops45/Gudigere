@@ -7,7 +7,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Star, ChevronLeft, ChevronRight, Quote, Zap } from "lucide-react";
 import API from "../../services/api";
 
-// Types
 interface Testimonial {
   _id: string;
   name: string;
@@ -35,7 +34,6 @@ function AvatarInitials({ name, size = "w-10 h-10" }: { name: string; size?: str
   );
 }
 
-// Helper: render stars
 const renderStars = (rating: number) => {
   return Array.from({ length: 5 }).map((_, i) => (
     <Star
@@ -46,7 +44,6 @@ const renderStars = (rating: number) => {
   ));
 };
 
-// Animation variants
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 30 },
   whileInView: { opacity: 1, y: 0 },
@@ -54,7 +51,6 @@ const fadeUp = (delay = 0) => ({
   transition: { duration: 0.6, delay, ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number] },
 });
 
-// Single Testimonial Card
 function TestimonialCard({ testimonial, index }: { testimonial: Testimonial; index: number }) {
   return (
     <motion.div
@@ -65,30 +61,15 @@ function TestimonialCard({ testimonial, index }: { testimonial: Testimonial; ind
       whileHover={{ y: -5 }}
       className="bg-white rounded-2xl shadow-lg p-6 border border-pink-100 hover:border-pink-300 hover:shadow-xl transition-all"
     >
-      {/* Quote Icon */}
       <Quote size={28} className="text-pink-200 mb-3" />
-
-      {/* Comment */}
       <p className="text-gray-700 text-sm leading-relaxed mb-4 line-clamp-4">
         "{testimonial.comment}"
       </p>
-
-      {/* Star Rating */}
-      <div className="flex mb-3">
-        {renderStars(testimonial.rating)}
-      </div>
-
-      {/* User Info */}
+      <div className="flex mb-3">{renderStars(testimonial.rating)}</div>
       <div className="flex items-center gap-3">
         {testimonial.avatar ? (
           <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-200 shrink-0">
-            <Image
-              src={testimonial.avatar}
-              alt={testimonial.name}
-              fill
-              sizes="40px"
-              className="object-cover"
-            />
+            <Image src={testimonial.avatar} alt={testimonial.name} fill sizes="40px" className="object-cover" />
           </div>
         ) : (
           <AvatarInitials name={testimonial.name} />
@@ -103,28 +84,17 @@ function TestimonialCard({ testimonial, index }: { testimonial: Testimonial; ind
           </div>
         </div>
       </div>
-
-      {/* Product Name (optional) */}
       {testimonial.productName && (
-        <p className="text-xs text-pink-600 mt-2">
-          Bought: {testimonial.productName}
-        </p>
+        <p className="text-xs text-pink-600 mt-2">Bought: {testimonial.productName}</p>
       )}
     </motion.div>
   );
 }
 
-// Carousel Navigation (for mobile/tablet)
 function TestimonialCarousel({ testimonials }: { testimonials: Testimonial[] }) {
   const [current, setCurrent] = useState(0);
-
-  const next = () => {
-    setCurrent((prev) => (prev + 1) % testimonials.length);
-  };
-
-  const prev = () => {
-    setCurrent((prev) => (prev - 1 + testimonials.length) % testimonials.length);
-  };
+  const next = () => setCurrent((prev) => (prev + 1) % testimonials.length);
+  const prev = () => setCurrent((prev) => (prev - 1 + testimonials.length) % testimonials.length);
 
   return (
     <div className="relative px-8">
@@ -139,22 +109,12 @@ function TestimonialCarousel({ testimonials }: { testimonials: Testimonial[] }) 
           <TestimonialCard testimonial={testimonials[current]} index={0} />
         </motion.div>
       </AnimatePresence>
-
-      {/* Navigation Buttons */}
-      <button
-        onClick={prev}
-        className="absolute left-0 top-1/2 -translate-y-1/2 bg-white rounded-full p-2 shadow-md hover:bg-gray-50"
-      >
+      <button onClick={prev} className="absolute left-0 top-1/2 -translate-y-1/2 bg-white rounded-full p-2 shadow-md hover:bg-gray-50">
         <ChevronLeft size={20} />
       </button>
-      <button
-        onClick={next}
-        className="absolute right-0 top-1/2 -translate-y-1/2 bg-white rounded-full p-2 shadow-md hover:bg-gray-50"
-      >
+      <button onClick={next} className="absolute right-0 top-1/2 -translate-y-1/2 bg-white rounded-full p-2 shadow-md hover:bg-gray-50">
         <ChevronRight size={20} />
       </button>
-
-      {/* Dots */}
       <div className="flex justify-center gap-2 mt-4">
         {testimonials.map((_, i) => (
           <button
@@ -170,7 +130,6 @@ function TestimonialCarousel({ testimonials }: { testimonials: Testimonial[] }) 
   );
 }
 
-// Main Component
 export default function Testimonials() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
@@ -184,21 +143,27 @@ export default function Testimonials() {
 
     const fetchTestimonials = async () => {
       try {
-        const res = await API.get("/products/reviews/all");
-        const mapped = (res.data as any[]).map((r) => ({
+        // ✅ New endpoint: returns only published reviews
+        const res = await API.get("/reviews/published");
+        console.log("✅ Published reviews:", res.data);
+
+        const reviews = Array.isArray(res.data) ? res.data : [];
+        const mapped = reviews.map((r: any) => ({
           _id: r._id,
-          name: r.user?.name ?? "Customer",
-          location: r.user?.location ?? "",
+          name: r.customer?.name ?? "Customer",
+          location: r.customer?.location ?? "",
           rating: r.rating,
           comment: r.comment,
-          avatar: r.user?.avatar ?? "",
+          avatar: r.customer?.avatar ?? "",
           productName: r.product?.title ?? "",
           isVerified: true,
           date: r.createdAt,
         }));
+
         setTestimonials(mapped);
-      } catch {
-        // fallback to empty — no stale mock data
+      } catch (err) {
+        console.error("❌ Error fetching reviews:", err);
+        setTestimonials([]);
       } finally {
         setLoading(false);
       }
@@ -216,11 +181,30 @@ export default function Testimonials() {
             <div className="h-8 bg-gray-200 rounded w-48 mx-auto mb-4" />
             <div className="h-12 bg-gray-200 rounded w-96 mx-auto mb-8" />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-gray-200 h-64 rounded-2xl" />
-              ))}
+              {[1, 2, 3].map((i) => <div key={i} className="bg-gray-200 h-64 rounded-2xl" />)}
             </div>
           </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (testimonials.length === 0) {
+    return (
+      <section className="bg-gray-50 py-16 md:py-24">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <span className="inline-flex items-center gap-2 bg-yellow-100 text-yellow-700 text-sm font-bold px-4 py-1.5 rounded-full">
+            <Zap size={14} /> Real Stories
+          </span>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black mt-4 text-gray-900">
+            What <span className="text-pink-600">Parents</span> Say
+          </h2>
+          <p className="text-gray-500 text-lg mt-3">
+            No published reviews yet – check back soon!
+          </p>
+          <p className="text-sm text-gray-400 mt-2">
+            (Admins can approve pending reviews in the dashboard)
+          </p>
         </div>
       </section>
     );
@@ -229,7 +213,6 @@ export default function Testimonials() {
   return (
     <section className="bg-linear-to-b from-gray-50 to-white py-16 md:py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
         <motion.div {...fadeUp(0)} className="text-center max-w-2xl mx-auto mb-12">
           <span className="inline-flex items-center gap-2 bg-yellow-100 text-yellow-700 text-sm font-bold px-4 py-1.5 rounded-full">
             <Zap size={14} /> Real Stories
@@ -242,30 +225,8 @@ export default function Testimonials() {
           </p>
         </motion.div>
 
-        {/* Average Rating Summary */}
-        <motion.div {...fadeUp(0.05)} className="bg-white rounded-2xl shadow-md p-6 mb-10 max-w-3xl mx-auto">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="text-center">
-                <div className="text-4xl font-black text-gray-900">4.8</div>
-                <div className="flex gap-0.5 mt-1">{renderStars(4.8)}</div>
-                <div className="text-xs text-gray-400 mt-1">from 2,345 reviews</div>
-              </div>
-              <div className="border-l pl-4">
-                <p className="text-sm text-gray-600 max-w-xs">
-                  ⭐ "Best toy store in India – amazing quality and support!"
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-green-600 font-bold">TrustScore 4.8</span>
-              <span className="text-gray-300">|</span>
-              <span className="text-pink-600 font-bold">Excellent</span>
-            </div>
-          </div>
-        </motion.div>
+        
 
-        {/* Testimonials Display */}
         {isMobile ? (
           <TestimonialCarousel testimonials={showAll ? testimonials : testimonials.slice(0, 3)} />
         ) : (
@@ -276,7 +237,6 @@ export default function Testimonials() {
           </div>
         )}
 
-        {/* View All Button */}
         {testimonials.length > 3 && (
           <motion.div {...fadeUp(0.2)} className="text-center mt-12">
             <button

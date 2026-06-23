@@ -72,8 +72,20 @@ export const adminDeleteProduct = async (id: string): Promise<any> => {
 };
 
 // Optional: public product endpoints (if needed)
-export const getAllProducts = async (): Promise<Product[]> => {
-  const res = await API.get("/products");
+export const getAllProducts = async (
+  age?: string
+): Promise<Product[]> => {
+
+  const params: any = {};
+
+  if (age) {
+    params.age = age;
+  }
+
+  const res = await API.get("/products", {
+    params,
+  });
+
   return res.data;
 };
 

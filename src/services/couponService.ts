@@ -20,11 +20,7 @@ export interface Coupon {
   active: boolean;
 }
 
-// NOTE: Add this public route to your backend coupon router (no auth middleware):
-//   router.get("/active", async (req, res) => {
-//     const coupons = await Coupon.find({ active: true });
-//     res.json({ coupons });
-//   });
+
 export const getActiveCoupons = async (): Promise<Coupon[]> => {
   const res = await API.get("/coupons/active");
   return (

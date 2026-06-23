@@ -10,15 +10,19 @@ import {
   Plus,
   Heart,
   Star,
+  ArrowLeft,
 } from "lucide-react";
 
 import {
   getSingleProduct,
   Product,
+} from "../../../services/productService";
+
+import {
   Review,
   getProductReviews,
   createReview,
-} from "../../../services/productService";
+} from "../../../services/reviewService";
 
 import useCartStore from "../../../store/cartStore";
 
@@ -116,7 +120,7 @@ export default function ProductDetailsPage() {
   const fetchReviews = async () => {
     try {
       const data = await getProductReviews(params.id as string);
-      setReviews(data);
+      setReviews(data.reviews);
     } catch {
       // reviews fail silently
     }
@@ -126,50 +130,50 @@ export default function ProductDetailsPage() {
     fetchProduct();
     fetchReviews();
   }, []);
+const handleSubmitReview = async () => {
+  if (!token) {
+    toast.error("Please login to leave a review");
+    router.push("/login");
+    return;
+  }
 
-  const handleSubmitReview = async () => {
-    if (!token) {
-      toast.error("Please login to leave a review");
-      router.push("/login");
-      return;
-    }
-    if (reviewRating === 0) {
-      toast.error("Please select a rating");
-      return;
-    }
-    if (!reviewComment.trim()) {
-      toast.error("Please write a comment");
-      return;
-    }
-    setReviewSubmitting(true);
-    try {
-      const saved = await createReview(params.id as string, reviewRating, reviewComment);
-      toast.success("Review submitted!");
+  if (reviewRating === 0) {
+    toast.error("Please select a rating");
+    return;
+  }
 
-      // Optimistic update — show immediately without waiting for re-fetch
-      const optimistic: Review = saved?._id
-        ? saved
-        : {
-            _id: Date.now().toString(),
-            user: { _id: user?._id ?? "", name: user?.name ?? "You" },
-            rating: reviewRating,
-            comment: reviewComment,
-            createdAt: new Date().toISOString(),
-          };
-      setReviews((prev) => [optimistic, ...prev]);
+  if (!reviewComment.trim()) {
+    toast.error("Please write a comment");
+    return;
+  }
 
-      setReviewRating(0);
-      setReviewComment("");
+  setReviewSubmitting(true);
 
-      // Also sync with server in background
-      fetchReviews();
-    } catch {
-      toast.error("Failed to submit review");
-    } finally {
-      setReviewSubmitting(false);
-    }
-  };
+  try {
+    const res = await createReview({
+      product: params.id as string,
+      rating: reviewRating,
+      comment: reviewComment,
+    });
 
+    toast.success(res.message);
+
+    // Clear form
+    setReviewRating(0);
+    setReviewHover(0);
+    setReviewComment("");
+
+    // Reload published reviews
+    fetchReviews();
+  } catch (error: any) {
+    toast.error(
+      error.response?.data?.message ||
+      "Something went wrong."
+    );
+  } finally {
+    setReviewSubmitting(false);
+  }
+};
   // ADD TO CART
   const handleAddToCart = () => {
     if (!token) {
@@ -197,8 +201,8 @@ export default function ProductDetailsPage() {
   const inWishlist =
     product
       ? wishlistItems.some(
-          (i) => i._id === product._id
-        )
+        (i) => i._id === product._id
+      )
       : false;
 
   const handleWishlist =
@@ -297,6 +301,17 @@ export default function ProductDetailsPage() {
     <div className="min-h-screen bg-gray-50 py-12">
 
       <div className="max-w-7xl mx-auto px-4">
+        {/* ---- BACK BUTTON ---- */}
+        <div className="flex items-center mb-6">
+          <button
+            onClick={() => router.push('/')}
+            className="flex items-center gap-2 text-gray-600 hover:text-pink-600 transition-colors duration-150"
+            aria-label="Go back to homepage"
+          >
+            <ArrowLeft size={20} />
+            <span className="font-semibold">Back to Home</span>
+          </button>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
 
@@ -423,11 +438,10 @@ export default function ProductDetailsPage() {
               <button
                 onClick={handleWishlist}
                 disabled={wishlistLoading}
-                className={`sm:col-span-2 h-14 rounded-xl border-2 font-black text-base flex items-center justify-center gap-2.5 transition-all duration-150 ${
-                  inWishlist
+                className={`sm:col-span-2 h-14 rounded-xl border-2 font-black text-base flex items-center justify-center gap-2.5 transition-all duration-150 ${inWishlist
                     ? "border-pink-500 bg-pink-50 text-pink-600 hover:bg-pink-100"
                     : "border-gray-200 text-gray-600 hover:border-pink-400 hover:text-pink-600 hover:bg-pink-50"
-                }`}
+                  }`}
               >
                 <Heart
                   size={20}
@@ -458,14 +472,14 @@ export default function ProductDetailsPage() {
         {/* REVIEW LIST */}
         <div className="space-y-3 mb-6">
           {reviews.length === 0 ? (
-            <p className="text-gray-400 text-sm">No reviews yet. Be the first!</p>
+            <p className="text-gray-400 text-sm">No reviews yet!.</p>
           ) : (
             reviews.map((r) => (
               <div key={r._id} className="flex gap-3 p-3 rounded-xl border border-pink-100 bg-pink-50/30">
-                <AvatarInitials name={r.user?.name ?? "U"} />
+                <AvatarInitials name={r.customer?.name ?? "U"} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className="font-semibold text-gray-900 text-sm">{r.user?.name ?? "User"}</span>
+                    <span className="font-semibold text-gray-900 text-sm">{r.customer?.name ?? "User"}</span>
                     <div className="flex gap-0.5">
                       {[1, 2, 3, 4, 5].map((s) => (
                         <Star key={s} size={12} className={s <= r.rating ? "fill-amber-400 text-amber-400" : "text-gray-200 fill-gray-200"} />
