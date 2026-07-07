@@ -1,175 +1,292 @@
+// "use client";
+
+// import { motion } from "framer-motion";
+// import Link from "next/link";
+// import {
+//   Cake,
+//   IndianRupee,
+//   Puzzle,
+//   Tag,
+//   Star,
+//   Gift,
+// } from "lucide-react";
+
+// const filters = [
+//   {
+//     id: 1,
+//     title: "By Age",
+//     icon: Cake,
+//     color: "from-pink-500 to-rose-500",
+//     link: "/products?filter=age",
+//   },
+//   {
+//     id: 2,
+//     title: "By Price",
+//     icon: IndianRupee,
+//     color: "from-green-500 to-emerald-500",
+//     link: "/products?filter=price",
+//   },
+//   {
+//     id: 3,
+//     title: "By Toys",
+//     icon: Puzzle,
+//     color: "from-blue-500 to-cyan-500",
+//     link: "/products?filter=category",
+//   },
+//   {
+//     id: 4,
+//     title: "By Brand",
+//     icon: Tag,
+//     color: "from-purple-500 to-indigo-500",
+//     link: "/products?filter=brand",
+//   },
+//   {
+//     id: 5,
+//     title: "Top Rated",
+//     icon: Star,
+//     color: "from-yellow-500 to-orange-500",
+//     link: "/products?filter=rating",
+//   },
+//   {
+//     id: 6,
+//     title: "Offers",
+//     icon: Gift,
+//     color: "from-red-500 to-pink-500",
+//     link: "/products?filter=offers",
+//   },
+// ];
+
+// export default function ShopByFilters() {
+//   return (
+//     <section className="py-20 bg-gray-50">
+
+//       <div className="max-w-7xl mx-auto px-4">
+
+//         <div className="text-center mb-12">
+//           <h2 className="text-4xl font-bold">
+//             Shop by Filters
+//           </h2>
+
+//           <p className="text-gray-500 mt-3">
+//             Find toys quickly using different filters
+//           </p>
+//         </div>
+
+//         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+
+//           {filters.map((item) => {
+
+//             const Icon = item.icon;
+
+//             return (
+
+//               <Link
+//                 href={item.link}
+//                 key={item.id}
+//               >
+
+//                 <motion.div
+//                   whileHover={{ y: -8 }}
+//                   className={`rounded-3xl p-8 text-white bg-gradient-to-br ${item.color} shadow-lg cursor-pointer`}
+//                 >
+
+//                   <Icon size={40} />
+
+//                   <h3 className="mt-5 text-lg font-bold">
+//                     {item.title}
+//                   </h3>
+
+//                 </motion.div>
+
+//               </Link>
+
+//             );
+
+//           })}
+
+//         </div>
+
+//       </div>
+
+//     </section>
+//   );
+// }
+
+
+
+
+
+
 "use client";
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import {
+  Cake,
+  IndianRupee,
+  Puzzle,
+  Tag,
+  Star,
+  Gift,
+  Truck,
+  Sparkles,
+} from "lucide-react";
 
-const ageGroups = [
+const filters = [
   {
     id: 1,
-    range: "0–2",
-    suffix: "yrs",
-    label: "Babies & Toddlers",
-    description: "Soft toys, teethers & sensory play",
-    emoji: "🧸",
-    from: "#f472b6",
-    to: "#ec4899",
-    shadow: "rgba(236,72,153,0.35)",
-    link: "/products?age=0-2",
+    title: "By Age",
+    subtitle: "0 - 12+ Years",
+    icon: Cake,
+    color: "from-pink-500 to-rose-500",
+    link: "/products?filter=age",
   },
   {
     id: 2,
-    range: "3–5",
-    suffix: "yrs",
-    label: "Preschoolers",
-    description: "Blocks, pretend play & puzzles",
-    emoji: "🎨",
-    from: "#60a5fa",
-    to: "#3b82f6",
-    shadow: "rgba(59,130,246,0.35)",
-    link: "/products?age=3-5",
+    title: "By Price",
+    subtitle: "Best Budget",
+    icon: IndianRupee,
+    color: "from-green-500 to-emerald-500",
+    link: "/products?filter=price",
   },
   {
     id: 3,
-    range: "6–8",
-    suffix: "yrs",
-    label: "Little Explorers",
-    description: "STEM kits, board games & crafts",
-    emoji: "🔬",
-    from: "#34d399",
-    to: "#10b981",
-    shadow: "rgba(16,185,129,0.35)",
-    link: "/products?age=6-8",
+    title: "By Toy Type",
+    subtitle: "Educational, RC...",
+    icon: Puzzle,
+    color: "from-blue-500 to-cyan-500",
+    link: "/products?filter=category",
   },
   {
     id: 4,
-    range: "9–12",
-    suffix: "yrs",
-    label: "Young Innovators",
-    description: "Robotics, drones & strategy games",
-    emoji: "🤖",
-    from: "#a78bfa",
-    to: "#7c3aed",
-    shadow: "rgba(124,58,237,0.35)",
-    link: "/products?age=9-12",
+    title: "By Brand",
+    subtitle: "LEGO, Funskool...",
+    icon: Tag,
+    color: "from-purple-500 to-indigo-500",
+    link: "/products?filter=brand",
   },
   {
     id: 5,
-    range: "12+",
-    suffix: "yrs",
-    label: "Teens & Beyond",
-    description: "Advanced kits, collectibles & gadgets",
-    emoji: "🚀",
-    from: "#fbbf24",
-    to: "#f97316",
-    shadow: "rgba(249,115,22,0.35)",
-    link: "/products?age=12plus",
+    title: "Top Rated",
+    subtitle: "4★ & Above",
+    icon: Star,
+    color: "from-yellow-500 to-orange-500",
+    link: "/products?filter=rating",
+  },
+  {
+    id: 6,
+    title: "Offers",
+    subtitle: "Today's Deals",
+    icon: Gift,
+    color: "from-red-500 to-pink-500",
+    link: "/products?filter=offers",
+  },
+  {
+    id: 7,
+    title: "New Arrivals",
+    subtitle: "Latest Toys",
+    icon: Sparkles,
+    color: "from-cyan-500 to-sky-500",
+    link: "/products?filter=new",
+  },
+  {
+    id: 8,
+    title: "Free Delivery",
+    subtitle: "Eligible Products",
+    icon: Truck,
+    color: "from-teal-500 to-green-500",
+    link: "/products?filter=delivery",
   },
 ];
 
-export default function ShopByAge() {
+export default function ShopByFilters() {
   return (
-    <section className="py-16 md:py-24 bg-gray-950 overflow-hidden relative">
+    <section className="py-20 bg-gradient-to-b from-white to-gray-100">
 
-      {/* Background decorative blobs */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-pink-600/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="max-w-7xl mx-auto px-4">
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="text-center mb-14">
 
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-14"
-        >
-          <span className="inline-flex items-center gap-2 bg-pink-600/15 border border-pink-500/25 text-pink-400 text-xs font-bold px-4 py-1.5 rounded-full mb-4">
-            🎂 Find by Age
-          </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white">
-            Shop by <span className="text-pink-500">Age</span>
+          <h2 className="text-4xl md:text-5xl font-black">
+            <span className="text-gray-900">Shop By </span>
+            <span className="text-pink-500">Filters</span>
           </h2>
-          <p className="text-gray-400 text-base mt-3 max-w-lg mx-auto">
-            Perfect toys for every stage of childhood — from newborns to teens.
+
+          <p className="text-gray-500 mt-4 text-lg">
+            Find your perfect toy in seconds
           </p>
-        </motion.div>
 
-        {/* Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-5">
-          {ageGroups.map((group, i) => (
-            <motion.div
-              key={group.id}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.5, delay: i * 0.08, ease: "easeOut" }}
-              whileHover={{ y: -8, transition: { duration: 0.2 } }}
-            >
-              <Link href={group.link} className="block group">
-                <div
-                  className="relative rounded-3xl overflow-hidden p-6 flex flex-col items-center text-center h-full min-h-52 cursor-pointer transition-all duration-300"
-                  style={{
-                    background: `linear-gradient(145deg, ${group.from}, ${group.to})`,
-                    boxShadow: `0 8px 30px ${group.shadow}`,
-                  }}
-                >
-                  {/* Watermark age number */}
-                  <span
-                    className="absolute -bottom-3 -right-2 text-8xl font-black leading-none select-none pointer-events-none"
-                    style={{ color: "rgba(255,255,255,0.12)" }}
-                  >
-                    {group.range}
-                  </span>
-
-                  {/* Emoji */}
-                  <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-4 text-4xl group-hover:scale-110 transition-transform duration-200">
-                    {group.emoji}
-                  </div>
-
-                  {/* Age range */}
-                  <p className="text-3xl font-black text-white leading-none">
-                    {group.range}
-                    <span className="text-lg font-bold text-white/70 ml-1">{group.suffix}</span>
-                  </p>
-
-                  {/* Label */}
-                  <h3 className="text-sm font-black text-white mt-2 leading-tight">
-                    {group.label}
-                  </h3>
-
-                  {/* Description */}
-                  <p className="text-xs text-white/70 mt-1.5 leading-relaxed line-clamp-2">
-                    {group.description}
-                  </p>
-
-                  {/* CTA */}
-                  <div className="mt-4 flex items-center gap-1 bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-3 py-1.5 rounded-full transition-colors duration-150 group-hover:gap-2">
-                    Shop
-                    <ArrowRight size={12} className="transition-transform duration-150 group-hover:translate-x-0.5" />
-                  </div>
-                </div>
-              </Link>
-            </motion.div>
-          ))}
         </div>
 
-        {/* Bottom note */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.5 }}
-          className="text-center text-gray-500 text-sm mt-10"
-        >
-          👪 Not sure?{" "}
-          <Link href="/gift-guide" className="text-pink-400 hover:text-pink-300 transition-colors underline underline-offset-2">
-            Our Gift Guide
-          </Link>{" "}
-          helps you choose the perfect toy.
-        </motion.p>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-7">
+
+          {filters.map((item) => {
+
+            const Icon = item.icon;
+
+            return (
+
+              <Link
+                href={item.link}
+                key={item.id}
+              >
+
+                <motion.div
+
+                  whileHover={{
+                    y: -10,
+                    scale: 1.04,
+                  }}
+
+                  whileTap={{
+                    scale: .97,
+                  }}
+
+                  className={`group rounded-3xl bg-gradient-to-br ${item.color} p-8 shadow-xl cursor-pointer relative overflow-hidden`}
+
+                >
+
+                  <div className="absolute -right-6 -top-6 w-28 h-28 bg-white/10 rounded-full" />
+
+                  <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-white/10 rounded-full" />
+
+                  <div className="relative z-10">
+
+                    <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center">
+
+                      <Icon
+                        size={34}
+                        className="text-white"
+                      />
+
+                    </div>
+
+                    <h3 className="mt-6 text-white text-xl font-black">
+
+                      {item.title}
+
+                    </h3>
+
+                    <p className="text-white/80 mt-2 text-sm">
+
+                      {item.subtitle}
+
+                    </p>
+
+                  </div>
+
+                </motion.div>
+
+              </Link>
+
+            );
+
+          })}
+
+        </div>
+
       </div>
+
     </section>
   );
 }

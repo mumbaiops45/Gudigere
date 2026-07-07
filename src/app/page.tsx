@@ -11,9 +11,10 @@ import CategorySection from "@/components/CategorySection";
 import FeaturedProducts from "./components/FeaturedProducts";
 import DealOfTheDay from "./components/DealOfTheDay";
 import ShopByAge from "./components/ShopByAge";
-import Testimonials from "./components/Testimonials";
+// import Testimonials from "./components/Testimonials";
 import BrandsNewsletter from "./components/BrandsNewsletter";
 import WhyChooseUs from "./components/WhyChooseUs";
+import OurBrandsPage from "./components/OurBrandsPage";
 export default function Home() {
   return (
     <div className="bg-white min-h-screen">
@@ -24,7 +25,8 @@ export default function Home() {
       <FeaturedProducts />
       <DealOfTheDay />
       <ShopByAge />
-      <Testimonials />
+      <OurBrandsPage />
+      {/* <Testimonials /> */}
       <BrandsNewsletter />
       <WhyChooseUs />
     </div>
