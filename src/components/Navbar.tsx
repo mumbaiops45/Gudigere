@@ -716,7 +716,8 @@ export default function Navbar() {
   const cartItems = useCartStore((s: { cartItems: unknown[]; clearCart: () => void }) => s.cartItems);
   const clearCart = useCartStore((s: { cartItems: unknown[]; clearCart: () => void }) => s.clearCart);
   const cartCount = cartItems.reduce((sum: number, item: unknown) => sum + ((item as { quantity?: number }).quantity ?? 1), 0);
-  const wishlistCount = useWishlistStore((s) => s.wishlistItems.length);
+  const wishlistItems = useWishlistStore((s) => s.wishlistItems);
+  const wishlistCount = user ? wishlistItems.length : 0;
 
   useEffect(() => {
     const saved = localStorage.getItem("gudigear-location");
@@ -770,6 +771,7 @@ export default function Navbar() {
   const handleLogout = () => {
     logout();
     clearCart();
+    useWishlistStore.getState().clearWishlist(); 
     setUserMenuOpen(false);
     setDrawerOpen(false);
     router.push("/");
