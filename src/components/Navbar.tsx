@@ -904,13 +904,13 @@ export default function Navbar() {
                   <p className="text-sm font-bold text-slate-800 group-hover:text-pink-600 transition-colors">Become Seller</p>
                 </div>
               </button>
-              <button className="hidden lg:flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-pink-50 transition-colors group">
+              {/* <button className="hidden lg:flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-pink-50 transition-colors group">
                 <Package size={18} className="text-slate-500 group-hover:text-pink-600 transition-colors" />
                 <div className="leading-tight text-left">
                   <p className="text-[10px] text-slate-400 group-hover:text-pink-400 transition-colors">Returns &</p>
                   <p className="text-sm font-bold text-slate-800 group-hover:text-pink-600 transition-colors">Orders</p>
                 </div>
-              </button>
+              </button> */}
               <button onClick={() => router.push("/wishlist")} className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-pink-50 transition-colors group">
                 <div className="relative">
                   <Heart size={18} className="text-slate-500 group-hover:text-pink-600 transition-colors" />
