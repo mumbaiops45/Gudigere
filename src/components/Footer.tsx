@@ -25,6 +25,7 @@ const ageLinks = [
 const companyLinks = [
   { name: "About Us", href: "/about" },
   { name: "Become a Vendor", href: "/become-vendor" },
+  { name: " My Orders", href: "/myorders" },
   // { name: "Careers", href: "/careers" },
   // { name: "Blog", href: "/blog" },
 ];
