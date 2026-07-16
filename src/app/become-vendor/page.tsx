@@ -134,6 +134,11 @@ export default function BecomeVendorPage() {
     }
   };
 
+  // ── Scroll to "How It Works" section ──
+  const scrollToHowItWorks = () => {
+    document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <>
       {/* marquee CSS — self-contained so globals.css stays untouched */}
@@ -251,9 +256,12 @@ export default function BecomeVendorPage() {
               >
                 Start Selling Free <ArrowRight size={18} />
               </motion.button>
+
+              {/* ── "See How It Works" now scrolls to the steps section ── */}
               <motion.button
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.97 }}
+                onClick={scrollToHowItWorks}   // ← added
                 className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-semibold text-base border transition-all"
                 style={{ border: "1px solid rgba(255,255,255,.2)", color: "rgba(255,255,255,.8)", background: "rgba(255,255,255,.06)" }}
               >
@@ -365,8 +373,13 @@ export default function BecomeVendorPage() {
 
         {/* ════════════════════════════════════════
             4. HOW IT WORKS — 3 steps, x-alternating
+             added id="how-it-works"
         ════════════════════════════════════════ */}
-        <section className="py-24 overflow-hidden" style={{ background: "var(--bg)" }}>
+        <section
+          id="how-it-works"   // ← added ID for scrolling
+          className="py-24 overflow-hidden"
+          style={{ background: "var(--bg)" }}
+        >
           <div className="max-w-5xl mx-auto px-6">
             <motion.div
               variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}
