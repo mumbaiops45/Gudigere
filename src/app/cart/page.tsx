@@ -82,13 +82,12 @@ function StepBar({ step }: { step: Step }) {
       {steps.map((s, i) => (
         <div key={s.key} className="flex items-center gap-1">
           <span
-            className={`text-sm font-bold transition-colors ${
-              order.indexOf(s.key) === active
-                ? "text-pink-600"
-                : order.indexOf(s.key) < active
+            className={`text-sm font-bold transition-colors ${order.indexOf(s.key) === active
+              ? "text-pink-600"
+              : order.indexOf(s.key) < active
                 ? "text-green-600"
                 : "text-gray-400"
-            }`}
+              }`}
           >
             {s.label}
           </span>
@@ -678,8 +677,9 @@ export default function CartPage() {
                           <input
                             type="text"
                             value={address.city}
-                            readOnly
-                            className="w-full h-12 px-4 rounded-xl border-2 border-gray-200 bg-gray-50"
+                            onChange={(e) => setAddress({ ...address, city: e.target.value })}
+                            placeholder="Enter city"
+                            className="w-full h-12 px-4 rounded-xl border-2 border-gray-200 focus:border-pink-500 focus:outline-none text-sm transition-colors"
                           />
                         </div>
                         <div>
@@ -687,8 +687,9 @@ export default function CartPage() {
                           <input
                             type="text"
                             value={address.state}
-                            readOnly
-                            className="w-full h-12 px-4 rounded-xl border-2 border-gray-200 bg-gray-50"
+                            onChange={(e) => setAddress({ ...address, state: e.target.value })}
+                            placeholder="Enter state"
+                            className="w-full h-12 px-4 rounded-xl border-2 border-gray-200 focus:border-pink-500 focus:outline-none text-sm transition-colors"
                           />
                         </div>
                       </div>
@@ -701,11 +702,10 @@ export default function CartPage() {
                               key={t}
                               type="button"
                               onClick={() => setAddress({ ...address, type: t })}
-                              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all ${
-                                address.type === t
-                                  ? "border-pink-500 bg-pink-50 text-pink-700"
-                                  : "border-gray-200 text-gray-600 hover:border-gray-300"
-                              }`}
+                              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all ${address.type === t
+                                ? "border-pink-500 bg-pink-50 text-pink-700"
+                                : "border-gray-200 text-gray-600 hover:border-gray-300"
+                                }`}
                             >
                               {t === "Home" ? <HomeIcon size={15} /> : <Briefcase size={15} />}
                               {t}
@@ -757,16 +757,14 @@ export default function CartPage() {
                       <button
                         type="button"
                         onClick={() => setPaymentMethod("razorpay")}
-                        className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all ${
-                          paymentMethod === "razorpay"
-                            ? "border-pink-500 bg-pink-50"
-                            : "border-gray-200 hover:border-gray-300 bg-white"
-                        }`}
+                        className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all ${paymentMethod === "razorpay"
+                          ? "border-pink-500 bg-pink-50"
+                          : "border-gray-200 hover:border-gray-300 bg-white"
+                          }`}
                       >
                         <div
-                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                            paymentMethod === "razorpay" ? "border-pink-500" : "border-gray-300"
-                          }`}
+                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${paymentMethod === "razorpay" ? "border-pink-500" : "border-gray-300"
+                            }`}
                         >
                           {paymentMethod === "razorpay" && (
                             <div className="w-2.5 h-2.5 rounded-full bg-pink-500" />
@@ -789,16 +787,14 @@ export default function CartPage() {
                       <button
                         type="button"
                         onClick={() => setPaymentMethod("cod")}
-                        className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all ${
-                          paymentMethod === "cod"
-                            ? "border-pink-500 bg-pink-50"
-                            : "border-gray-200 hover:border-gray-300 bg-white"
-                        }`}
+                        className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all ${paymentMethod === "cod"
+                          ? "border-pink-500 bg-pink-50"
+                          : "border-gray-200 hover:border-gray-300 bg-white"
+                          }`}
                       >
                         <div
-                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                            paymentMethod === "cod" ? "border-pink-500" : "border-gray-300"
-                          }`}
+                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${paymentMethod === "cod" ? "border-pink-500" : "border-gray-300"
+                            }`}
                         >
                           {paymentMethod === "cod" && (
                             <div className="w-2.5 h-2.5 rounded-full bg-pink-500" />
