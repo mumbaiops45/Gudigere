@@ -31,9 +31,9 @@ const companyLinks = [
 ];
 
 const supportLinks = [
-  { name: "Help Center", href: "/help" },
-  { name: "Shipping Policy", href: "/shipping" },
-  { name: "7-Day Easy Returns", href: "/returns" },
+  // { name: "Help Center", href: "/help" },
+  // { name: "Shipping Policy", href: "/shipping" },
+  // { name: "7-Day Easy Returns", href: "/returns" },
   { name: "Privacy Policy", href: "/privacy-policy" },
   { name: "Terms & Conditions", href: "/terms-and-conditions" },
 ];
