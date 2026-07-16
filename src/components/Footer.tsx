@@ -310,9 +310,9 @@ export default function Footer() {
             <Link href="/terms-and-conditions" className="text-sm text-gray-500 hover:text-pink-400 transition">
               Terms & Conditions
             </Link>
-            <Link href="/sitemap.xml" className="text-sm text-gray-500 hover:text-pink-400 transition">
+            {/* <Link href="/sitemap.xml" className="text-sm text-gray-500 hover:text-pink-400 transition">
               Sitemap
-            </Link>
+            </Link> */}
           </div>
 
         </div>
