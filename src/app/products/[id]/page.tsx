@@ -31,6 +31,7 @@ import useAuthStore from "../../../store/authStore";
 import {
   addToWishlist,
   removeWishlistItem,
+  getWishlist,
 } from "../../../services/wishlistService";
 
 import useWishlistStore from "../../../store/wishlistStore";
@@ -175,27 +176,78 @@ const handleSubmitReview = async () => {
   }
 };
   // ADD TO CART
-  const handleAddToCart = () => {
+ const handleAddToCart = async () => {
     if (!token) {
-      toast.error("Please login first");
-      router.push("/login");
-      return;
+        toast.error("Please login first");
+        router.push("/login");
+        return;
     }
 
     if (!product) return;
 
-    addToCart({ ...product, quantity });
+    addToCart({
+        ...product,
+        quantity,
+    });
+
+    if (inWishlist) {
+        try {
+            await removeWishlistItem(product._id);
+
+            const data = await getWishlist();
+
+            const products =
+                data?.wishlist?.products ??
+                data?.products ??
+                (Array.isArray(data?.wishlist) ? data.wishlist : []) ??
+                [];
+
+            setWishlistItems(products);
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     toast.success("Added to cart");
-  };
+};
 
   // BUY NOW
-  const handleBuyNow =
-    () => {
+ const handleBuyNow = async () => {
+    if (!token) {
+        toast.error("Please login first");
+        router.push("/login");
+        return;
+    }
 
-      handleAddToCart();
+    if (!product) return;
 
-      router.push("/cart");
-    };
+    addToCart({
+        ...product,
+        quantity,
+    });
+
+    if (inWishlist) {
+        try {
+            await removeWishlistItem(product._id);
+
+            const data = await getWishlist();
+
+            const products =
+                data?.wishlist?.products ??
+                data?.products ??
+                (Array.isArray(data?.wishlist) ? data.wishlist : []) ??
+                [];
+
+            setWishlistItems(products);
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    router.push("/cart");
+};
 
   // WISHLIST
   const inWishlist =

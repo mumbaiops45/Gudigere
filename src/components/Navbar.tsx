@@ -596,6 +596,7 @@ function LocationDropdown({ onSelect, onClose }: { onSelect: (city: string, pin:
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => { inputRef.current?.focus(); }, []);
 
+
   const search = useCallback((q: string) => {
     if (timerRef.current) clearTimeout(timerRef.current);
     if (!q.trim()) { setResults([]); return; }
@@ -702,6 +703,7 @@ function LocationDropdown({ onSelect, onClose }: { onSelect: (city: string, pin:
 /* ── main navbar with redesigned categories ── */
 export default function Navbar() {
   const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [locationOpen, setLocationOpen] = useState(false);
@@ -715,9 +717,18 @@ export default function Navbar() {
 
   const cartItems = useCartStore((s: { cartItems: unknown[]; clearCart: () => void }) => s.cartItems);
   const clearCart = useCartStore((s: { cartItems: unknown[]; clearCart: () => void }) => s.clearCart);
-  const cartCount = cartItems.reduce((sum: number, item: unknown) => sum + ((item as { quantity?: number }).quantity ?? 1), 0);
+  const cartCount = cartItems.length;
+  // const cartCount = cartItems.reduce((sum: number, item: unknown) => sum + ((item as { quantity?: number }).quantity ?? 1), 0);
   const wishlistItems = useWishlistStore((s) => s.wishlistItems);
   const wishlistCount = user ? wishlistItems.length : 0;
+
+  const handleSearch = () => {
+    const query = searchQuery.trim();
+
+    if (!query) return;
+
+    router.push(`/products?search=${encodeURIComponent(query)}`);
+  };
 
   useEffect(() => {
     const saved = localStorage.getItem("gudigear-location");
@@ -771,7 +782,7 @@ export default function Navbar() {
   const handleLogout = () => {
     logout();
     clearCart();
-    useWishlistStore.getState().clearWishlist(); 
+    useWishlistStore.getState().clearWishlist();
     setUserMenuOpen(false);
     setDrawerOpen(false);
     router.push("/");
@@ -829,8 +840,26 @@ export default function Navbar() {
                 <option>Robots</option>
                 <option>Dolls</option>
               </select>
-              <input type="text" placeholder="Search toys, brands, age groups…" className="flex-1 px-4 text-sm text-slate-700 placeholder:text-slate-400 outline-none bg-white" />
-              <button className="h-full px-5 bg-pink-600 hover:bg-pink-700 transition-colors text-white shrink-0 flex items-center justify-center">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSearch();
+                  }
+                }}
+                placeholder="Search toys, brands, age groups…"
+                className="flex-1 px-4 text-sm text-slate-700 placeholder:text-slate-400 outline-none bg-white"
+              />
+              {/* <input type="text" placeholder="Search toys, brands, age groups…" className="flex-1 px-4 text-sm text-slate-700 placeholder:text-slate-400 outline-none bg-white" /> */}
+              {/* <button className="h-full px-5 bg-pink-600 hover:bg-pink-700 transition-colors text-white shrink-0 flex items-center justify-center">
+                <Search size={18} />
+              </button> */}
+              <button
+                onClick={handleSearch}
+                className="h-full px-5 bg-pink-600 hover:bg-pink-700 transition-colors text-white shrink-0 flex items-center justify-center"
+              >
                 <Search size={18} />
               </button>
             </div>
