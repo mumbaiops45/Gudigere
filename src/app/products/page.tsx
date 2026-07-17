@@ -80,12 +80,21 @@ import {
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-
   const searchParams = useSearchParams();
 
   const age = searchParams.get("age") || undefined;
   const search = searchParams.get("search") || undefined;
   const category = searchParams.get("category") || undefined;
+  const brand = searchParams.get("brand") || undefined;
+
+  const minPrice = searchParams.get("minPrice")
+    ? Number(searchParams.get("minPrice"))
+    : undefined;
+
+  const maxPrice = searchParams.get("maxPrice")
+    ? Number(searchParams.get("maxPrice"))
+    : undefined;
+
   const sort = searchParams.get("sort") || undefined;
 
   useEffect(() => {
@@ -95,11 +104,14 @@ export default function ProductsPage() {
   const fetchProducts = async () => {
     try {
       const data = await getAllProducts(
-        age,
-        search,
-        category,
-        sort
-      );
+  age,
+  search,
+  category,
+  brand,
+  minPrice,
+  maxPrice,
+  sort
+);
 
       setProducts(data);
     } catch (error) {

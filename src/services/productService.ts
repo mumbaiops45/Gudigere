@@ -76,6 +76,9 @@ export const getAllProducts = async (
   age?: string,
   search?: string,
   category?: string,
+  brand?: string,
+  minPrice?: number,
+  maxPrice?: number,
   sort?: string
 ): Promise<Product[]> => {
 
@@ -84,7 +87,11 @@ export const getAllProducts = async (
   if (age) params.age = age;
   if (search) params.search = search;
   if (category) params.category = category;
+  if (brand) params.brand = brand;
+  if (minPrice !== undefined) params.minPrice = minPrice;
+  if (maxPrice !== undefined) params.maxPrice = maxPrice;
   if (sort) params.sort = sort;
+
   const res = await API.get("/products", {
     params,
   });
