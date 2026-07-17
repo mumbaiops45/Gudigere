@@ -66,7 +66,6 @@
 //     </div>
 //   );
 // }
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -84,15 +83,24 @@ export default function ProductsPage() {
 
   const searchParams = useSearchParams();
 
-  const age = searchParams.get("age");
+  const age = searchParams.get("age") || undefined;
+  const search = searchParams.get("search") || undefined;
+  const category = searchParams.get("category") || undefined;
+  const sort = searchParams.get("sort") || undefined;
 
   useEffect(() => {
     fetchProducts();
-  }, [age]);
+  }, [age, search, category, sort]);
 
   const fetchProducts = async () => {
     try {
-      const data = await getAllProducts(age || undefined);
+      const data = await getAllProducts(
+        age,
+        search,
+        category,
+        sort
+      );
+
       setProducts(data);
     } catch (error) {
       console.log(error);
@@ -102,6 +110,14 @@ export default function ProductsPage() {
   };
 
   const getTitle = () => {
+    if (search) {
+      return `Search Results for "${search}"`;
+    }
+
+    if (category) {
+      return category;
+    }
+
     switch (age) {
       case "0-2":
         return "0–2 Years Toys";
@@ -136,7 +152,7 @@ export default function ProductsPage() {
       {products.length === 0 ? (
         <div className="text-center py-20">
           <p className="text-xl text-gray-500">
-            No products found for this age group.
+            No products found.
           </p>
         </div>
       ) : (

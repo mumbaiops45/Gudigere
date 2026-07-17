@@ -73,15 +73,18 @@ export const adminDeleteProduct = async (id: string): Promise<any> => {
 
 // Optional: public product endpoints (if needed)
 export const getAllProducts = async (
-  age?: string
+  age?: string,
+  search?: string,
+  category?: string,
+  sort?: string
 ): Promise<Product[]> => {
 
   const params: any = {};
 
-  if (age) {
-    params.age = age;
-  }
-
+  if (age) params.age = age;
+  if (search) params.search = search;
+  if (category) params.category = category;
+  if (sort) params.sort = sort;
   const res = await API.get("/products", {
     params,
   });

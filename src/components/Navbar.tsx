@@ -596,7 +596,6 @@ function LocationDropdown({ onSelect, onClose }: { onSelect: (city: string, pin:
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => { inputRef.current?.focus(); }, []);
 
-
   const search = useCallback((q: string) => {
     if (timerRef.current) clearTimeout(timerRef.current);
     if (!q.trim()) { setResults([]); return; }
@@ -831,15 +830,8 @@ export default function Navbar() {
             </div>
 
             {/* search bar (unchanged) */}
-            <div className="hidden md:flex flex-1 h-11 rounded-xl overflow-hidden border-2 border-slate-200 hover:border-pink-400 focus-within:border-pink-600 focus-within:shadow-[0_0_0_3px_rgba(219,39,119,.12)] transition-all bg-white">
-              <select className="h-full px-3 bg-slate-50 border-r border-slate-200 text-sm text-slate-600 outline-none font-medium cursor-pointer shrink-0 hover:bg-pink-50 transition-colors">
-                <option>All</option>
-                <option>RC Cars</option>
-                <option>Teddy Bears</option>
-                <option>LEGO</option>
-                <option>Robots</option>
-                <option>Dolls</option>
-              </select>
+            <div className="hidden md:flex relative flex-1 h-11 rounded-xl overflow-hidden border-2 border-slate-200 hover:border-pink-400 focus-within:border-pink-600 focus-within:shadow-[0_0_0_3px_rgba(219,39,119,.12)] transition-all bg-white">
+              {/* <div className="hidden md:flex flex-1 h-11 rounded-xl overflow-hidden border-2 border-slate-200 hover:border-pink-400 focus-within:border-pink-600 focus-within:shadow-[0_0_0_3px_rgba(219,39,119,.12)] transition-all bg-white"> */}
               <input
                 type="text"
                 value={searchQuery}
@@ -849,21 +841,31 @@ export default function Navbar() {
                     handleSearch();
                   }
                 }}
-                placeholder="Search toys, brands, age groups…"
-                className="flex-1 px-4 text-sm text-slate-700 placeholder:text-slate-400 outline-none bg-white"
+                placeholder="Search toys, brands, age groups..."
+                className="flex-1 px-4 pr-12 text-sm text-slate-700 placeholder:text-slate-400 outline-none bg-white"
               />
-              {/* <input type="text" placeholder="Search toys, brands, age groups…" className="flex-1 px-4 text-sm text-slate-700 placeholder:text-slate-400 outline-none bg-white" /> */}
-              {/* <button className="h-full px-5 bg-pink-600 hover:bg-pink-700 transition-colors text-white shrink-0 flex items-center justify-center">
-                <Search size={18} />
-              </button> */}
+
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery("");
+                    router.push("/");
+                  }}
+                  // className="absolute right-14 top-1/2 -translate-y-1/2 z-10 p-1 rounded-full hover:bg-gray-100"
+                  className="absolute right-16 top-1/2 -translate-y-1/2 z-10 p-1 rounded-full hover:bg-gray-100 transition-colors"
+                >
+                  <X size={16} className="text-gray-500" />
+                </button>
+              )}
+
               <button
                 onClick={handleSearch}
-                className="h-full px-5 bg-pink-600 hover:bg-pink-700 transition-colors text-white shrink-0 flex items-center justify-center"
+                className="h-full px-5 bg-pink-600 hover:bg-pink-700 transition-colors text-white flex items-center justify-center"
               >
                 <Search size={18} />
               </button>
             </div>
-
             {/* right actions (unchanged) */}
             <div className="flex items-center gap-0.5 ml-auto">
               <button onClick={() => setSearchOpen(v => !v)} className="md:hidden p-2 rounded-lg hover:bg-pink-50 hover:text-pink-600 transition-colors">

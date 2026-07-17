@@ -66,7 +66,7 @@ export default function ProductDetailsPage() {
   const { token: storeToken, user } = useAuthStore() as { token: string | null; user: any; logout: () => void };
   const token = storeToken || (typeof window !== "undefined" ? localStorage.getItem("token") : null);
 
-  const { addToCart } = useCartStore();
+  const { addToCart, cartItems } = useCartStore();
 
   const {
     wishlistItems,
@@ -131,123 +131,109 @@ export default function ProductDetailsPage() {
     fetchProduct();
     fetchReviews();
   }, []);
-const handleSubmitReview = async () => {
-  if (!token) {
-    toast.error("Please login to leave a review");
-    router.push("/login");
-    return;
-  }
-
-  if (reviewRating === 0) {
-    toast.error("Please select a rating");
-    return;
-  }
-
-  if (!reviewComment.trim()) {
-    toast.error("Please write a comment");
-    return;
-  }
-
-  setReviewSubmitting(true);
-
-  try {
-    const res = await createReview({
-      product: params.id as string,
-      rating: reviewRating,
-      comment: reviewComment,
-    });
-
-    toast.success(res.message);
-
-    // Clear form
-    setReviewRating(0);
-    setReviewHover(0);
-    setReviewComment("");
-
-    // Reload published reviews
-    fetchReviews();
-  } catch (error: any) {
-    toast.error(
-      error.response?.data?.message ||
-      "Something went wrong."
-    );
-  } finally {
-    setReviewSubmitting(false);
-  }
-};
-  // ADD TO CART
- const handleAddToCart = async () => {
+  const handleSubmitReview = async () => {
     if (!token) {
-        toast.error("Please login first");
-        router.push("/login");
-        return;
+      toast.error("Please login to leave a review");
+      router.push("/login");
+      return;
+    }
+
+    if (reviewRating === 0) {
+      toast.error("Please select a rating");
+      return;
+    }
+
+    if (!reviewComment.trim()) {
+      toast.error("Please write a comment");
+      return;
+    }
+
+    setReviewSubmitting(true);
+
+    try {
+      const res = await createReview({
+        product: params.id as string,
+        rating: reviewRating,
+        comment: reviewComment,
+      });
+
+      toast.success(res.message);
+
+      // Clear form
+      setReviewRating(0);
+      setReviewHover(0);
+      setReviewComment("");
+
+      // Reload published reviews
+      fetchReviews();
+    } catch (error: any) {
+      toast.error(
+        error.response?.data?.message ||
+        "Something went wrong."
+      );
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
+  // ADD TO CART
+  const handleAddToCart = async () => {
+    if (!token) {
+      toast.error("Please login first");
+      router.push("/login");
+      return;
     }
 
     if (!product) return;
 
     addToCart({
-        ...product,
-        quantity,
+      ...product,
+      quantity,
     });
 
     if (inWishlist) {
-        try {
-            await removeWishlistItem(product._id);
+      try {
+        await removeWishlistItem(product._id);
 
-            const data = await getWishlist();
+        const data = await getWishlist();
 
-            const products =
-                data?.wishlist?.products ??
-                data?.products ??
-                (Array.isArray(data?.wishlist) ? data.wishlist : []) ??
-                [];
+        const products =
+          data?.wishlist?.products ??
+          data?.products ??
+          (Array.isArray(data?.wishlist) ? data.wishlist : []) ??
+          [];
 
-            setWishlistItems(products);
+        setWishlistItems(products);
 
-        } catch (error) {
-            console.log(error);
-        }
+      } catch (error) {
+        console.log(error);
+      }
     }
 
     toast.success("Added to cart");
-};
+  };
 
   // BUY NOW
- const handleBuyNow = async () => {
+  const handleBuyNow = async () => {
     if (!token) {
-        toast.error("Please login first");
-        router.push("/login");
-        return;
+      toast.error("Please login first");
+      router.push("/login");
+      return;
     }
 
     if (!product) return;
+    const exists = cartItems.some(
+      (item: any) => item._id === product._id
+    );
 
-    addToCart({
+    if (!exists) {
+      addToCart({
         ...product,
         quantity,
-    });
-
-    if (inWishlist) {
-        try {
-            await removeWishlistItem(product._id);
-
-            const data = await getWishlist();
-
-            const products =
-                data?.wishlist?.products ??
-                data?.products ??
-                (Array.isArray(data?.wishlist) ? data.wishlist : []) ??
-                [];
-
-            setWishlistItems(products);
-
-        } catch (error) {
-            console.log(error);
-        }
+      });
     }
 
     router.push("/cart");
-};
+  };
 
   // WISHLIST
   const inWishlist =
@@ -491,8 +477,8 @@ const handleSubmitReview = async () => {
                 onClick={handleWishlist}
                 disabled={wishlistLoading}
                 className={`sm:col-span-2 h-14 rounded-xl border-2 font-black text-base flex items-center justify-center gap-2.5 transition-all duration-150 ${inWishlist
-                    ? "border-pink-500 bg-pink-50 text-pink-600 hover:bg-pink-100"
-                    : "border-gray-200 text-gray-600 hover:border-pink-400 hover:text-pink-600 hover:bg-pink-50"
+                  ? "border-pink-500 bg-pink-50 text-pink-600 hover:bg-pink-100"
+                  : "border-gray-200 text-gray-600 hover:border-pink-400 hover:text-pink-600 hover:bg-pink-50"
                   }`}
               >
                 <Heart
