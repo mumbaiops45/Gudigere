@@ -100,6 +100,15 @@ function StepBar({ step }: { step: Step }) {
   );
 }
 
+const onlyLetters = (value: string) =>
+  value
+    .replace(/[^a-zA-Z\s]/g, "")
+    .replace(/\s{2,}/g, " ")
+    .trimStart();
+
+const isValidName = (value: string) =>
+  /^[A-Za-z]+(?:\s[A-Za-z]+)*$/.test(value.trim());
+
 /* ── Main component ─────────────────────────────────────────────── */
 export default function CartPage() {
   const router = useRouter();
@@ -166,12 +175,57 @@ export default function CartPage() {
 
   const handleConfirmAddress = () => {
     const { fullName, mobile, pincode, flat, area, city, state } = address;
-    if (!fullName || !mobile || !pincode || !flat || !area || !city || !state) {
-      toast.error("Please fill all required fields");
+
+    if (!fullName.trim()) {
+      toast.error("Please enter your full name");
       return;
     }
-    if (mobile.length !== 10) { toast.error("Enter a valid 10-digit mobile number"); return; }
-    if (pincode.length !== 6) { toast.error("Enter a valid 6-digit pincode"); return; }
+
+    if (!/^[A-Za-z\s]+$/.test(fullName.trim())) {
+      toast.error("Full name should contain only letters");
+      return;
+    }
+
+    if (!/^\d{10}$/.test(mobile)) {
+      toast.error("Enter a valid 10-digit mobile number");
+      return;
+    }
+
+    if (!/^\d{6}$/.test(pincode)) {
+      toast.error("Enter a valid 6-digit pincode");
+      return;
+    }
+
+    if (!flat.trim()) {
+      toast.error("Please enter Flat / House No.");
+      return;
+    }
+
+    if (!area.trim()) {
+      toast.error("Please enter Area / Street");
+      return;
+    }
+
+    if (!city.trim()) {
+      toast.error("Please enter Town / City");
+      return;
+    }
+
+    if (!isValidName(city)) {
+      toast.error("Town / City should contain only letters");
+      return;
+    }
+
+    if (!state.trim()) {
+      toast.error("Please enter State");
+      return;
+    }
+
+    if (!isValidName(state)) {
+      toast.error("State should contain only letters");
+      return;
+    }
+
     setStep("payment");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -593,7 +647,13 @@ export default function CartPage() {
                           <input
                             type="text"
                             value={address.fullName}
-                            onChange={(e) => setAddress({ ...address, fullName: e.target.value })}
+                            // onChange={(e) => setAddress({ ...address, fullName: e.target.value })}
+                            onChange={(e) =>
+                              setAddress({
+                                ...address,
+                                fullName: onlyLetters(e.target.value).slice(0, 50),
+                              })
+                            }
                             placeholder="e.g. Ravi Sharma"
                             className="w-full h-12 px-4 rounded-xl border-2 border-gray-200 focus:border-pink-500 focus:outline-none text-sm transition-colors"
                           />
@@ -677,7 +737,13 @@ export default function CartPage() {
                           <input
                             type="text"
                             value={address.city}
-                            onChange={(e) => setAddress({ ...address, city: e.target.value })}
+                            // onChange={(e) => setAddress({ ...address, city: e.target.value })}
+                            onChange={(e) =>
+                              setAddress({
+                                ...address,
+                                city: onlyLetters(e.target.value).slice(0, 50),
+                              })
+                            }
                             placeholder="Enter city"
                             className="w-full h-12 px-4 rounded-xl border-2 border-gray-200 focus:border-pink-500 focus:outline-none text-sm transition-colors"
                           />
@@ -687,7 +753,13 @@ export default function CartPage() {
                           <input
                             type="text"
                             value={address.state}
-                            onChange={(e) => setAddress({ ...address, state: e.target.value })}
+                            // onChange={(e) => setAddress({ ...address, state: e.target.value })}
+                            onChange={(e) =>
+                              setAddress({
+                                ...address,
+                                state: onlyLetters(e.target.value).slice(0, 50),
+                              })
+                            }
                             placeholder="Enter state"
                             className="w-full h-12 px-4 rounded-xl border-2 border-gray-200 focus:border-pink-500 focus:outline-none text-sm transition-colors"
                           />

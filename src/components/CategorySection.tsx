@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ArrowRight, ChevronLeft, ChevronRight, CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
@@ -27,11 +27,24 @@ type Category = {
 
 export default function CategorySection() {
   const { categories, loading } = useCategory();
+  const router = useRouter();
 
   // ── State to track the selected category ──
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [redirecting, setRedirecting] = useState(false);
 
+  const handleCategoryClick = (category: Category) => {
+    if (redirecting) return;
+
+    setRedirecting(true);
+    setSelectedId(category._id);
+
+    setTimeout(() => {
+      router.push(`/categories/${encodeURIComponent(category.name)}`);
+    }, 500);
+  };
   if (loading) {
+
     return (
       <section className="py-24 bg-gradient-to-b from-white to-gray-50">
         <div className="max-w-[1400px] mx-auto px-6">
@@ -112,9 +125,10 @@ export default function CategorySection() {
                 key={category._id}
                 className="!w-[320px] md:!w-[380px]"
               >
-                <Link
-                  href={`/categories/${encodeURIComponent(category.name)}`}
-                  onClick={() => setSelectedId(category._id)}
+                <div
+                  onClick={() => handleCategoryClick(category)}
+                  className={`cursor-pointer transition-all duration-300 ${redirecting ? "pointer-events-none" : ""
+                    }`}
                 >
                   <div
                     className={`
@@ -127,7 +141,8 @@ export default function CategorySection() {
                       shadow-[0_20px_60px_rgba(0,0,0,0.15)]
                       transition-all
                       duration-300
-                      ${isSelected
+                     ${redirecting ? "pointer-events-none opacity-95" : ""}
+${isSelected
                         ? "ring-4 ring-pink-500 ring-offset-4 scale-[1.02]"
                         : "hover:scale-[1.01]"
                       }
@@ -154,12 +169,14 @@ export default function CategorySection() {
 
                     {/* Badges */}
                     <div className="absolute top-5 left-5 flex gap-2">
-                      <span className="px-4 py-2 rounded-full bg-white/20 backdrop-blur-md border border-white/20 text-white text-xs font-semibold">
+                      <span className="px-4 py-2 rounded-full bg-white text-pink-600 shadow-lg text-xs font-bold">
+                        {/* <span className="px-4 py-2 rounded-full bg-white/20 backdrop-blur-md border border-white/20 text-white text-xs font-semibold"> */}
                         Featured
                       </span>
                       {isSelected && (
-                        <span className="px-4 py-2 rounded-full bg-pink-500 text-white text-xs font-semibold flex items-center gap-1">
-                          <CheckCircle size={14} /> Selected
+                        <span className="px-4 py-2 rounded-full bg-pink-500 text-white text-xs font-semibold flex items-center gap-1 animate-pulse">
+                          <CheckCircle size={14} />
+                          Selected
                         </span>
                       )}
                     </div>
@@ -234,7 +251,7 @@ export default function CategorySection() {
                       "
                     />
                   </div>
-                </Link>
+                </div>
               </SwiperSlide>
             );
           })}
