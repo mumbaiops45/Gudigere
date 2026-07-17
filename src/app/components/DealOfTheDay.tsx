@@ -1,23 +1,27 @@
 // src/components/home/DealOfTheDay.tsx
 "use client";
+import { getDealOfTheDay } from "@/services/productService";
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Clock, ShoppingCart, Zap, Shield } from "lucide-react";
+import useCartStore from "../../store/cartStore";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
+
 
 // Types
 interface DealProduct {
   _id: string;
-  name: string;
-  slug: string;
+  title: string;
+  description: string;
   price: number;
-  originalPrice: number;
+  dealPrice: number;
+  discountPrice: number;
   images: string[];
-  discount: number;
-  stockLeft: number;
-  soldCount: number;
+  stock: number;
+  dealEndDate: string;
 }
 
 // Countdown Timer Component
@@ -79,36 +83,38 @@ const fadeUp = (delay = 0) => ({
 export default function DealOfTheDay() {
   const [deal, setDeal] = useState<DealProduct | null>(null);
   const [loading, setLoading] = useState(true);
-  
+  const router = useRouter();
+  const addToCart = useCartStore((state) => state.addToCart);
+
+  const handleAddToCart = () => {
+    if (!deal) return;
+addToCart({
+  ...deal,
+  price: deal.dealPrice,
+  quantity: 1,
+});
+
+    router.push("/cart");
+  };
   // Set target date to end of day + 2 days (example)
-  const targetDate = new Date();
-  targetDate.setDate(targetDate.getDate() + 2);
-  targetDate.setHours(23, 59, 59, 999);
+  const targetDate = deal
+    ? new Date(deal.dealEndDate)
+    : new Date();
 
   useEffect(() => {
     // Replace with your actual API call
     const fetchDeal = async () => {
       try {
-        // Example: const res = await API.get("/products/deal-of-the-day");
-        // setDeal(res.data);
-        
-        // Mock data
-        setTimeout(() => {
-          setDeal({
-            _id: "deal_001",
-            name: "Ultimate Remote Control Stunt Car",
-            slug: "ultimate-rc-stunt-car",
-            price: 1799,
-            originalPrice: 3999,
-            images: ["https://images.unsplash.com/photo-1596464716127-f2a82984de30?q=80&w=600&auto=format"],
-            discount: 55,
-            stockLeft: 23,
-            soldCount: 127,
-          });
-          setLoading(false);
-        }, 500);
-      } catch (error) {
-        console.error("Failed to fetch deal:", error);
+        const res = await getDealOfTheDay();
+
+        const product = Array.isArray(res)
+          ? res[0]
+          : Array.isArray(res?.products)
+            ? res.products[0]
+            : res.product ?? res;
+
+        setDeal(product || null);
+      } finally {
         setLoading(false);
       }
     };
@@ -161,15 +167,18 @@ export default function DealOfTheDay() {
           >
             <div className="relative h-80 sm:h-96 rounded-2xl overflow-hidden shadow-2xl">
               <Image
-                src={deal.images[0]}
-                alt={deal.name}
+                src={deal.images?.[0] || "/placeholder-product.png"}
+                alt={deal.title}
                 fill
-                sizes="(max-width: 1024px) 100vw, 50vw"
+                sizes="(max-width:1024px) 100vw, 50vw"
                 className="object-cover group-hover:scale-105 transition duration-500"
               />
               {/* Discount Badge */}
               <div className="absolute top-4 left-4 bg-red-600 text-white text-2xl font-black px-4 py-2 rounded-full shadow-lg rotate-[-5deg]">
-                -{deal.discount}%
+                -{deal.price > 0
+                  ? Math.round(((deal.price - deal.dealPrice) / deal.price) * 100)
+                  : 0}
+                %
               </div>
             </div>
           </motion.div>
@@ -182,28 +191,31 @@ export default function DealOfTheDay() {
                   ⚡ Hot Deal
                 </span>
                 <span className="bg-orange-100 text-orange-700 text-xs font-bold px-2 py-1 rounded-full">
-                  {deal.stockLeft} left in stock
+                  {deal.stock} left in stock
                 </span>
               </div>
               <h3 className="text-2xl sm:text-3xl font-black text-gray-900">
-                {deal.name}
+                {deal.title}
               </h3>
               <p className="text-gray-500 mt-2">
-                High-speed, 360° rotation, rechargeable battery. Perfect gift for kids aged 6+.
+                {deal.description}
               </p>
             </div>
 
             {/* Pricing */}
             <div className="flex items-baseline gap-3">
-              <span className="text-4xl font-black text-red-600">₹{deal.price.toLocaleString()}</span>
-              <span className="text-lg text-gray-400 line-through">₹{deal.originalPrice.toLocaleString()}</span>
+              <span className="text-4xl font-black text-red-600">₹{Number(deal.dealPrice ?? 0).toLocaleString("en-IN")}</span>
+              <span className="text-lg text-gray-400 line-through">₹{Number(deal.price ?? 0).toLocaleString("en-IN")}</span>
               <span className="bg-red-100 text-red-700 text-sm font-bold px-2 py-1 rounded-full">
-                Save ₹{(deal.originalPrice - deal.price).toLocaleString()}
+                Save ₹{(
+                  Number(deal.price ?? 0) -
+                  Number(deal.dealPrice ?? 0)
+                ).toLocaleString("en-IN")}
               </span>
             </div>
 
             {/* Sold Count */}
-            <div className="bg-white/60 rounded-xl p-4">
+            {/* <div className="bg-white/60 rounded-xl p-4">
               <div className="flex justify-between text-sm mb-2">
                 <span className="font-semibold text-gray-700">Already sold:</span>
                 <span className="font-bold text-pink-600">{deal.soldCount} units</span>
@@ -214,7 +226,7 @@ export default function DealOfTheDay() {
                   style={{ width: `${Math.min((deal.soldCount / (deal.soldCount + deal.stockLeft)) * 100, 100)}%` }}
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* Countdown Timer */}
             <div className="bg-linear-to-r from-red-600 to-orange-600 rounded-2xl p-5 text-center shadow-xl">
@@ -229,12 +241,13 @@ export default function DealOfTheDay() {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
+                onClick={handleAddToCart}
                 className="flex-1 bg-linear-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all"
               >
                 <ShoppingCart size={20} />
-                Add to Cart – ₹{deal.price}
+                Add to Cart – ₹{deal.dealPrice}
               </motion.button>
-              <Link href={`/product/${deal.slug}`} className="flex-1">
+              <Link href={`/products/${deal._id}`} className="flex-1">
                 <button className="w-full border-2 border-gray-300 hover:border-pink-600 text-gray-700 hover:text-pink-600 font-bold py-4 rounded-xl transition-all">
                   View Details
                 </button>

@@ -130,3 +130,11 @@ export const createReview = async (
 
   return res.data;
 };
+
+// ===============================
+// GET DEAL OF THE DAY
+// ===============================
+export const getDealOfTheDay = async () => {
+  const res = await API.get("/products/deal-of-the-day");
+  return res.data;
+};
