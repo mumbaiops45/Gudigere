@@ -720,6 +720,7 @@ export default function Navbar() {
   // const cartCount = cartItems.reduce((sum: number, item: unknown) => sum + ((item as { quantity?: number }).quantity ?? 1), 0);
   const wishlistItems = useWishlistStore((s) => s.wishlistItems);
   const wishlistCount = user ? wishlistItems.length : 0;
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleSearch = () => {
     const query = searchQuery.trim();
@@ -779,12 +780,21 @@ export default function Navbar() {
   }, [userMenuOpen]);
 
   const handleLogout = () => {
-    logout();
-    clearCart();
-    useWishlistStore.getState().clearWishlist();
     setUserMenuOpen(false);
     setDrawerOpen(false);
-    router.push("/");
+    setShowLogoutConfirm(true);
+  };
+
+  const confirmLogout = async () => {
+    await logout();
+    clearCart();
+    useWishlistStore.getState().clearWishlist();
+    setShowLogoutConfirm(false);
+    router.replace("/");
+  };
+
+  const cancelLogout = () => {
+    setShowLogoutConfirm(false);
   };
 
   const handleLocationSelect = (city: string, pin: string) => {
@@ -1007,6 +1017,35 @@ export default function Navbar() {
               </Link>
             ))}
           </div>
+          {showLogoutConfirm && (
+            <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/50">
+              <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Logout Confirmation
+                </h3>
+
+                <p className="mt-3 text-sm text-gray-600">
+                  Are you sure you want to logout?
+                </p>
+
+                <div className="mt-6 flex justify-end gap-3">
+                  <button
+                    onClick={cancelLogout}
+                    className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-100"
+                  >
+                    No
+                  </button>
+
+                  <button
+                    onClick={confirmLogout}
+                    className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
+                  >
+                    Yes
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </nav>
       </header>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import { ArrowRight, ChevronLeft, ChevronRight, CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
@@ -28,16 +28,16 @@ type Category = {
 export default function CategorySection() {
   const { categories, loading } = useCategory();
   const router = useRouter();
-
+  const pathname = usePathname();
   // ── State to track the selected category ──
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  // const [selectedId, setSelectedId] = useState<string | null>(null);
   const [redirecting, setRedirecting] = useState(false);
 
   const handleCategoryClick = (category: Category) => {
     if (redirecting) return;
 
     setRedirecting(true);
-    setSelectedId(category._id);
+    // setSelectedId(category._id);
 
     setTimeout(() => {
       router.push(`/categories/${encodeURIComponent(category.name)}`);
@@ -118,7 +118,8 @@ export default function CategorySection() {
           className="!pb-10"
         >
           {categories.map((category: Category) => {
-            const isSelected = selectedId === category._id;
+            const isSelected =
+              pathname === `/categories/${encodeURIComponent(category.name)}`;
 
             return (
               <SwiperSlide
@@ -143,7 +144,7 @@ export default function CategorySection() {
                       duration-300
                      ${redirecting ? "pointer-events-none opacity-95" : ""}
 ${isSelected
-                        ? "ring-4 ring-pink-500 ring-offset-4 scale-[1.02]"
+                        ? "ring-4 ring-pink-500 ring-offset-4 scale-[1.03] border-4 border-pink-500 shadow-2xl"
                         : "hover:scale-[1.01]"
                       }
                     `}
@@ -183,20 +184,26 @@ ${isSelected
 
                     {/* Content Box */}
                     <div
-                      className="
-                        absolute
-                        bottom-5
-                        left-5
-                        right-5
-                        p-5
-                        rounded-3xl
-                        bg-white/10
-                        backdrop-blur-xl
-                        border
-                        border-white/20
-                      "
+                      className={`
+    absolute
+    bottom-5
+    left-5
+    right-5
+    p-5
+    rounded-3xl
+    backdrop-blur-xl
+    border
+    transition-all
+    ${isSelected
+                          ? "bg-pink-600/90 border-pink-400"
+                          : "bg-white/10 border-white/20"
+                        }
+  `}
                     >
-                      <h3 className="text-white text-2xl font-bold mb-2">
+                      <h3
+                        className={`text-2xl font-bold mb-2 ${isSelected ? "text-yellow-300" : "text-white"
+                          }`}
+                      >
                         {category.name}
                       </h3>
 

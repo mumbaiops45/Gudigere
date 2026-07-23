@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -22,6 +22,8 @@ import {
   AlertCircle,
   CreditCard,
   Banknote,
+  Search,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -42,6 +44,25 @@ interface Address {
   city: string;
   state: string;
   type: AddressType;
+}
+
+// ─── Extended suggestion interface ──────────────────────────────
+interface Suggestion {
+  display_name: string;
+  lat: string;
+  lon: string;
+  address: {
+    house_number?: string;
+    road?: string;
+    suburb?: string;
+    city?: string;
+    town?: string;
+    village?: string;
+    state?: string;
+    postcode?: string;
+    country?: string;
+    neighbourhood?: string;
+  };
 }
 
 const EMPTY_ADDRESS: Address = {
@@ -141,6 +162,14 @@ export default function CartPage() {
   const [loadingPincode, setLoadingPincode] = useState(false);
   const [pincodeError, setPincodeError] = useState("");
   const [confirmedTotal, setConfirmedTotal] = useState(0);
+
+  // ── Address search states ──
+  const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [addressSelected, setAddressSelected] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -354,24 +383,146 @@ export default function CartPage() {
     }
   };
 
+  // ── Address search using Nominatim ──────────────────────────────
+  const searchAddress = useCallback(async (query: string) => {
+    if (!query.trim()) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+    setIsSearching(true);
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          query
+        )}&addressdetails=1&limit=20&countrycodes=in`,
+        { headers: { 'User-Agent': 'GoodieGear/1.0' } }
+      );
+      const data = await res.json();
+
+      // Normalise: split by comma, trim each part, collapse spaces, join with ', '
+      const seen = new Set<string>();
+      const unique = data.filter((s: Suggestion) => {
+        const normalized = s.display_name
+          .split(',')
+          .map(part => part.trim().toLowerCase().replace(/\s+/g, ' '))
+          .join(', ');
+        if (seen.has(normalized)) return false;
+        seen.add(normalized);
+        return true;
+      });
+
+      setSuggestions(unique);
+      setShowSuggestions(true);
+    } catch (error) {
+      console.error("Address search error:", error);
+    } finally {
+      setIsSearching(false);
+    }
+  }, []);
+
+  // Debounced search
+ useEffect(() => {
+  if (searchTimeout.current) {
+    clearTimeout(searchTimeout.current);
+  }
+
+  if (addressSelected) return;
+
+  searchTimeout.current = setTimeout(() => {
+    searchAddress(searchQuery);
+  }, 400);
+
+  return () => {
+    if (searchTimeout.current) {
+      clearTimeout(searchTimeout.current);
+    }
+  };
+}, [searchQuery, addressSelected, searchAddress]);
+
+  // const handleSelectSuggestion = (suggestion: Suggestion) => {
+  //   const addr = suggestion.address;
+  //   setAddress((prev) => ({
+  //     ...prev,
+  //     flat: addr.house_number || prev.flat,
+  //     area: addr.road || addr.suburb || addr.neighbourhood || prev.area,
+  //     city: addr.city || addr.town || addr.village || prev.city,
+  //     state: addr.state || prev.state,
+  //     pincode: addr.postcode || prev.pincode,
+  //   }));
+  //   setSearchQuery(suggestion.display_name);
+  //   setSuggestions([]);
+  //   setShowSuggestions(false);
+  // };
+
+
+  const handleSelectSuggestion = (suggestion: Suggestion) => {
+    const addr = suggestion.address;
+    setAddress((prev) => ({
+      ...prev,
+      flat: addr.house_number || prev.flat,
+      area: addr.road || addr.suburb || addr.neighbourhood || prev.area,
+      city: addr.city || addr.town || addr.village || prev.city,
+      state: addr.state || prev.state,
+      pincode: addr.postcode || prev.pincode,
+    }));
+    // Keep the selected address in the search input
+    setSearchQuery(suggestion.display_name);
+    setAddressSelected(true);
+    setSuggestions([]);
+    setShowSuggestions(false);
+  };
+
+  const clearSearch = () => {
+    setAddressSelected(false);
+    setSearchQuery("");
+    setSuggestions([]);
+    setShowSuggestions(false);
+    setAddress(EMPTY_ADDRESS); // ← clears all address fields
+  };
+
+
+  // ── Improved Current Location ──────────────────────────────────
   const getCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocation is not supported by your browser");
+      return;
+    }
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
-        );
-        const data = await response.json();
-        setAddress((prev) => ({
-          ...prev,
-          city: data?.address?.city || "",
-          state: data?.address?.state || "",
-          area: data?.address?.suburb || data?.address?.neighbourhood || "",
-          pincode: data?.address?.postcode || "",
-        }));
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`
+          );
+          const data = await res.json();
+          const addr = data.address || {};
+          setAddress((prev) => ({
+            ...prev,
+            flat: addr.house_number || prev.flat,
+            area: addr.road || addr.suburb || addr.neighbourhood || prev.area,
+            city: addr.city || addr.town || addr.village || prev.city,
+            state: addr.state || prev.state,
+            pincode: addr.postcode || prev.pincode,
+          }));
+          setSearchQuery(data.display_name || "");
+          setAddressSelected(true);
+          toast.success("Location updated successfully");
+        } catch (error) {
+          toast.error("Failed to fetch location details");
+        }
       },
-      () => toast.error("Location permission denied")
+      (error) => {
+        toast.error(
+          "Unable to detect your current location. Please allow location permission or search your address manually."
+        );
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
     );
   };
 
@@ -480,7 +631,6 @@ export default function CartPage() {
             {/* ── LEFT: Cart items / Address form / Payment ── */}
             <div className="lg:col-span-2 space-y-4">
               <AnimatePresence mode="wait">
-
                 {/* STEP 1 — Cart */}
                 {step === "cart" && (
                   <motion.div
@@ -610,7 +760,7 @@ export default function CartPage() {
                   </motion.div>
                 )}
 
-                {/* STEP 2 — Address form */}
+                {/* STEP 2 — Address form with search */}
                 {step === "address" && (
                   <motion.div
                     key="address"
@@ -630,15 +780,73 @@ export default function CartPage() {
                     </div>
 
                     <div className="space-y-4">
-                      <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-5 mb-6">
-                        <div className="flex items-start gap-3">
-                          <MapPin className="text-pink-600 mt-1" size={18} />
-                          <div>
-                            <h3 className="font-bold text-gray-900">Deliver To</h3>
-                            <p className="text-sm text-gray-600 mt-1">{address.fullName || "Customer"}</p>
-                            <p className="text-sm text-gray-500">{address.mobile}</p>
-                          </div>
+                      {/* ── Address Search ── */}
+                      <div className="relative">
+                        <div className="flex items-center bg-gray-50 border border-gray-200 rounded-xl px-4 focus-within:border-pink-500 focus-within:ring-1 focus-within:ring-pink-500 transition-all">
+                          <Search size={18} className="text-gray-400 shrink-0" />
+                          <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => {
+                              setAddressSelected(false);
+                              setSearchQuery(e.target.value);
+                            }}
+                            placeholder="Search for your area, street, or landmark..."
+                            className="w-full h-12 bg-transparent pl-3 pr-2 text-sm outline-none placeholder:text-gray-400"
+                            onFocus={() => {
+  if (!addressSelected && suggestions.length > 0) {
+    setShowSuggestions(true);
+  }
+}}
+                            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                          />
+                          {searchQuery && (
+                            <button
+                              onClick={clearSearch}
+                              className="text-gray-400 hover:text-gray-600 p-1 shrink-0"
+                            >
+                              <X size={16} />
+                            </button>
+                          )}
+                          {isSearching && (
+                            <div className="w-4 h-4 border-2 border-pink-200 border-t-pink-600 rounded-full animate-spin shrink-0" />
+                          )}
                         </div>
+
+                        {/* Suggestions dropdown */}
+                        {showSuggestions && suggestions.length > 0 && (
+                          <ul className="absolute z-20 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto divide-y divide-gray-100">
+                            {suggestions.map((s, idx) => (
+                              <li
+                                key={idx}
+                                onMouseDown={() => handleSelectSuggestion(s)}
+                                className="px-4 py-3 hover:bg-pink-50 cursor-pointer transition-colors flex items-start gap-3"
+                              >
+                                <MapPin size={16} className="text-pink-500 mt-0.5 shrink-0" />
+                                <span className="text-sm text-gray-700">{s.display_name}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={getCurrentLocation}
+                          className="flex items-center gap-2 text-pink-600 font-semibold text-sm hover:underline"
+                        >
+                          <MapPin size={16} />
+                          Use Current Location
+                        </button>
+                        <span className="text-xs text-gray-400">or</span>
+                        <button
+                          type="button"
+                          onClick={clearSearch}
+                          className="text-xs text-gray-500 hover:text-pink-600 transition-colors"
+                        >
+                          Clear search
+                        </button>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -647,7 +855,6 @@ export default function CartPage() {
                           <input
                             type="text"
                             value={address.fullName}
-                            // onChange={(e) => setAddress({ ...address, fullName: e.target.value })}
                             onChange={(e) =>
                               setAddress({
                                 ...address,
@@ -671,15 +878,6 @@ export default function CartPage() {
                           />
                         </div>
                       </div>
-
-                      <button
-                        type="button"
-                        onClick={getCurrentLocation}
-                        className="flex items-center gap-2 text-pink-600 font-semibold text-sm"
-                      >
-                        <MapPin size={16} />
-                        Use Current Location
-                      </button>
 
                       <div>
                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Pincode *</label>
@@ -737,7 +935,6 @@ export default function CartPage() {
                           <input
                             type="text"
                             value={address.city}
-                            // onChange={(e) => setAddress({ ...address, city: e.target.value })}
                             onChange={(e) =>
                               setAddress({
                                 ...address,
@@ -753,7 +950,6 @@ export default function CartPage() {
                           <input
                             type="text"
                             value={address.state}
-                            // onChange={(e) => setAddress({ ...address, state: e.target.value })}
                             onChange={(e) =>
                               setAddress({
                                 ...address,

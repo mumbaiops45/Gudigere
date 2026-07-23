@@ -3,8 +3,8 @@ import Link from "next/link";
 import { ChevronLeft, PackageSearch } from "lucide-react";
 
 import { getAllProducts, Product } from "../../../services/productService";
-import CategoryProductCard from "./CategoryProductCard";
-
+// import CategoryProductCard from "./CategoryProductCard";
+import CategoryProductList from "./CategoryProductList";
 interface Props {
   params: Promise<{ category: string }>;
 }
@@ -89,71 +89,35 @@ export default async function CategoryProductsPage({ params }: Props) {
       </div>
 
       <div className="max-w-[1400px] mx-auto px-4 py-8">
-        {filteredProducts.length > 0 && (
-          <div className="bg-white rounded-2xl border border-gray-200 p-4 mb-6 shadow-sm">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <p className="font-semibold text-gray-900">
-                Showing {filteredProducts.length} Products
-              </p>
-
-              <select className="h-11 px-4 rounded-xl border border-gray-200 bg-white text-sm">
-                <option>Sort By</option>
-                <option>Newest</option>
-                <option>Price Low → High</option>
-                <option>Price High → Low</option>
-                <option>Best Selling</option>
-              </select>
-            </div>
-          </div>
-        )}
-
-        {filteredProducts.length === 0 ? (
-          <div className="bg-white border rounded-3xl p-16 text-center shadow-sm">
-            <div className="w-24 h-24 bg-pink-50 rounded-full flex items-center justify-center mx-auto">
-              <PackageSearch
-                size={42}
-                className="text-pink-400"
-              />
-            </div>
-
-            <h2 className="mt-6 text-3xl font-bold text-gray-900">
-              No Products Found
-            </h2>
-
-            <p className="text-gray-500 mt-3">
-              Products for "{categoryName}" will appear here soon.
-            </p>
-
-            <Link href="/">
-              <button className="mt-8 bg-pink-600 hover:bg-pink-700 text-white font-semibold px-8 py-3 rounded-xl transition">
-                Continue Shopping
-              </button>
-            </Link>
-          </div>
-        ) : (
-          <div
-            className="
-            grid
-            grid-cols-2
-            md:grid-cols-3
-            lg:grid-cols-4
-            xl:grid-cols-5
-           gap-4
-           items-stretch
-          "
-          >
-            {filteredProducts.map(
-              (product: Product, index: number) => (
-                <CategoryProductCard
-                  key={product._id}
-                  product={product}
-                  index={index}
-                />
-              )
-            )}
-          </div>
-        )}
+  {filteredProducts.length === 0 ? (
+    <div className="bg-white border rounded-3xl p-16 text-center shadow-sm">
+      <div className="w-24 h-24 bg-pink-50 rounded-full flex items-center justify-center mx-auto">
+        <PackageSearch
+          size={42}
+          className="text-pink-400"
+        />
       </div>
+
+      <h2 className="mt-6 text-3xl font-bold text-gray-900">
+        No Products Found
+      </h2>
+
+      <p className="text-gray-500 mt-3">
+        Products for "{categoryName}" will appear here soon.
+      </p>
+
+      <Link href="/">
+        <button className="mt-8 bg-pink-600 hover:bg-pink-700 text-white font-semibold px-8 py-3 rounded-xl transition">
+          Continue Shopping
+        </button>
+      </Link>
+    </div>
+  ) : (
+    <CategoryProductList
+      products={filteredProducts}
+    />
+  )}
+</div>
     </div>
   );
 }
