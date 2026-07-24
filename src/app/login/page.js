@@ -15,76 +15,76 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
- const handleLogin = async (e) => {
-  e.preventDefault();
+  const handleLogin = async (e) => {
+    e.preventDefault();
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    // LOGIN API
-    const res = await API.post(
-      "/auth/login",
-      {
-        email,
-        password,
+      // LOGIN API
+      const res = await API.post(
+        "/auth/login",
+        {
+          email,
+          password,
+        }
+      );
+
+      // TOKEN
+      const token =
+        res.data.accessToken;
+
+      // USER
+      const user =
+        res.data.user;
+
+      // SAVE LOCAL STORAGE
+      localStorage.setItem(
+        "token",
+        token
+      );
+
+      localStorage.setItem(
+        "user",
+        JSON.stringify(user)
+      );
+
+      // SAVE STORE
+      setAuth(user, token);
+
+      toast.success(
+        "Login successful! Welcome back 👋"
+      );
+
+      // ROLE BASED REDIRECT
+      if (
+        user.role === "admin"
+      ) {
+        router.push("/admin");
+
+      } else if (
+        user.role ===
+        "vendor"
+      ) {
+        router.push("/vendor/vendor-dashboard");
+
+      } else {
+        router.push("/");
       }
-    );
 
-    // TOKEN
-    const token =
-      res.data.accessToken;
+    } catch (error) {
+      console.log(error);
 
-    // USER
-    const user =
-      res.data.user;
-
-    // SAVE LOCAL STORAGE
-    localStorage.setItem(
-      "token",
-      token
-    );
-
-    localStorage.setItem(
-      "user",
-      JSON.stringify(user)
-    );
-
-    // SAVE STORE
-    setAuth(user, token);
-
-    toast.success(
-      "Login successful! Welcome back 👋"
-    );
-
-    // ROLE BASED REDIRECT
-    if (
-      user.role === "admin"
-    ) {
-      router.push("/admin");
-
-    } else if (
-      user.role ===
-      "vendor"
-    ) {
-      router.push("/vendor/vendor-dashboard");
-
-    } else {
-      router.push("/");
-    }
-
-  } catch (error) {
-    console.log(error);
-
-    toast.error(
-      error.response?.data
-        ?.message ||
+      toast.error(
+        error.response?.data
+          ?.message ||
         "Login failed. Please try again."
-    );
+      );
 
-  } finally {
-    setLoading(false);
-  }
-};
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-[calc(100vh-64px)] flex">
@@ -213,9 +213,13 @@ export default function LoginPage() {
                   <label className="block text-sm font-semibold" style={{ color: "var(--text)" }}>
                     Password
                   </label>
-                  <button type="button" className="text-xs font-semibold"
-                    style={{ color: "var(--pink)" }}>
-                    Forgot password?
+                  <button
+                    type="button"
+                    onClick={() => router.push("/forgot-password")}
+                    className="text-xs font-semibold hover:underline"
+                    style={{ color: "var(--pink)" }}
+                  >
+                    Forgot Password?
                   </button>
                 </div>
                 <div className="relative">

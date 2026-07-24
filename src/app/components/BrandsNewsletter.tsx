@@ -1,3 +1,246 @@
+// // src/components/home/BrandsNewsletter.tsx
+// "use client";
+
+// import { useState } from "react";
+// import Image from "next/image";
+// import { motion } from "framer-motion";
+// import { Mail, Send, CheckCircle, Zap, ArrowRight } from "lucide-react";
+// import { toast } from "sonner";
+
+// // Brand logos data
+// const brands = [
+//   {
+//     id: 1,
+//     name: "LEGO",
+//     logo: "/logo1.png",
+//     url: "/brands/lego",
+//   },
+//   {
+//     id: 2,
+//     name: "Hot Wheels",
+//     logo: "/logo2.png",
+//     url: "/brands/hot-wheels",
+//   },
+//   {
+//     id: 3,
+//     name: "Barbie",
+//     logo: "/logo3.png",
+//     url: "/brands/barbie",
+//   },
+//   {
+//     id: 4,
+//     name: "Fisher-Price",
+//     logo: "/logo4.png",
+//     url: "/brands/fisher-price",
+//   },
+//   {
+//     id: 5,
+//     name: "Nerf",
+//     logo: "/logo5.png",
+//     url: "/brands/nerf",
+//   },
+//   {
+//     id: 6,
+//     name: "Hasbro",
+//     logo: "/logo6.png",
+//     url: "/brands/hasbro",
+//   },
+// ];
+
+// // Animation variants
+// const fadeUp = (delay = 0) => ({
+//   initial: { opacity: 0, y: 30 },
+//   whileInView: { opacity: 1, y: 0 },
+//   viewport: { once: true, margin: "-50px" },
+//   transition: { duration: 0.6, delay, ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number] },
+// });
+
+// const staggerContainer = {
+//   hidden: { opacity: 0 },
+//   visible: {
+//     opacity: 1,
+//     transition: { staggerChildren: 0.05 },
+//   },
+// };
+
+// const brandItemVariants = {
+//   hidden: { opacity: 0, scale: 0.9 },
+//   visible: { opacity: 1, scale: 1, transition: { duration: 0.3 } },
+// };
+
+// // Newsletter Form Component
+// function NewsletterForm() {
+//   const [email, setEmail] = useState("");
+//   const [loading, setLoading] = useState(false);
+//   const [subscribed, setSubscribed] = useState(false);
+
+//   const handleSubmit = async (e: React.FormEvent) => {
+//     e.preventDefault();
+//     if (!email) return;
+
+//     setLoading(true);
+//     try {
+//       // Replace with your actual API endpoint
+//       // await API.post("/newsletter/subscribe", { email });
+      
+//       // Simulate API call
+//       await new Promise((resolve) => setTimeout(resolve, 1000));
+      
+//       setSubscribed(true);
+//       toast.success("Thanks for subscribing! Check your inbox for a welcome gift 🎁");
+//       setEmail("");
+//       setTimeout(() => setSubscribed(false), 3000);
+//     } catch (error) {
+//       toast.error("Something went wrong. Please try again.");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   if (subscribed) {
+//     return (
+//       <motion.div
+//         initial={{ scale: 0.9, opacity: 0 }}
+//         animate={{ scale: 1, opacity: 1 }}
+//         className="text-center p-6 bg-green-50 rounded-2xl"
+//       >
+//         <CheckCircle size={48} className="text-green-500 mx-auto mb-3" />
+//         <h3 className="font-bold text-lg">You're subscribed! 🎉</h3>
+//         <p className="text-sm text-gray-600 mt-1">Welcome to the Goodie Gear family!</p>
+//       </motion.div>
+//     );
+//   }
+
+//   return (
+//     <form onSubmit={handleSubmit} className="space-y-4">
+//       <div className="relative">
+//         <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+//         <input
+//           type="email"
+//           placeholder="Enter your email address"
+//           value={email}
+//           onChange={(e) => setEmail(e.target.value)}
+//           required
+//           className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 outline-none transition"
+//         />
+//       </div>
+//       <motion.button
+//         type="submit"
+//         disabled={loading}
+//         whileHover={{ scale: 1.02 }}
+//         whileTap={{ scale: 0.98 }}
+//         className="w-full bg-linear-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md"
+//       >
+//         {loading ? (
+//           <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+//         ) : (
+//           <>
+//             Subscribe Now
+//             <Send size={16} />
+//           </>
+//         )}
+//       </motion.button>
+//       <p className="text-xs text-gray-400 text-center">
+//         No spam, only awesome deals. Unsubscribe anytime.
+//       </p>
+//     </form>
+//   );
+// }
+
+// // Main Component
+// export default function BrandsNewsletter() {
+//   return (
+//     <section className="bg-white py-16 md:py-20">
+//       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+//         {/* Header */}
+//         <motion.div {...fadeUp(0)} className="text-center max-w-2xl mx-auto mb-12">
+//           <span className="inline-flex items-center gap-2 bg-indigo-100 text-indigo-700 text-sm font-bold px-4 py-1.5 rounded-full">
+//             🤝 Trusted Partners
+//           </span>
+//           <h2 className="text-3xl sm:text-4xl font-black mt-4 text-gray-900">
+//             Brands <span className="text-pink-600">You Love</span>
+//           </h2>
+//           <p className="text-gray-500 mt-3">
+//             We partner with the world's most beloved toy brands
+//           </p>
+//         </motion.div>
+
+//         {/* Two Column Layout */}
+//         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
+//           {/* Left: Brands Grid */}
+//           <motion.div
+//             initial="hidden"
+//             whileInView="visible"
+//             viewport={{ once: true }}
+//             variants={staggerContainer}
+//             className="bg-gray-50 rounded-2xl p-6 shadow-sm"
+//           >
+//             <h3 className="text-xl font-bold text-gray-800 mb-6 text-center">✨ Our Brand Partners</h3>
+//             <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
+//               {brands.map((brand) => (
+//                 <motion.a
+//                   key={brand.id}
+//                   href={brand.url}
+//                   variants={brandItemVariants}
+//                   whileHover={{ y: -5, scale: 1.05 }}
+//                   className="bg-white rounded-xl p-4 flex items-center justify-center hover:shadow-md transition-all"
+//                 >
+//                   <div className="relative h-12 w-32">
+//                     <Image
+//                       src={brand.logo}
+//                       alt={brand.name}
+//                       fill
+//                       sizes="128px"
+//                       className="object-contain"
+//                     />
+//                   </div>
+//                 </motion.a>
+//               ))}
+//             </div>
+//             <div className="text-center mt-6">
+//               <a href="/brands" className="inline-flex items-center gap-1 text-sm text-pink-600 hover:gap-2 transition-all font-semibold">
+//                 View all brands <ArrowRight size={14} />
+//               </a>
+//             </div>
+//           </motion.div>
+
+//           {/* Right: Newsletter Signup */}
+//           <motion.div
+//             {...fadeUp(0.1)}
+//             className="bg-linear-to-br from-pink-50 via-purple-50 to-indigo-50 rounded-2xl p-6 md:p-8 shadow-md border border-white"
+//           >
+//             <div className="text-center mb-6">
+//               <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-full shadow-md mb-4">
+//                 <Zap size={28} className="text-pink-600" />
+//               </div>
+//               <h3 className="text-2xl font-black text-gray-900">
+//                 Get 10% OFF Your First Order!
+//               </h3>
+//               <p className="text-gray-600 mt-2 text-sm">
+//                 Subscribe to our newsletter and receive exclusive deals, new arrivals, and a 10% discount code.
+//               </p>
+//             </div>
+//             <NewsletterForm />
+//             <div className="flex flex-wrap justify-center gap-4 mt-6 text-xs text-gray-400">
+//               <span>✓ 10,000+ subscribers</span>
+//               <span>✓ Weekly deals</span>
+//               <span>✓ No spam</span>
+//             </div>
+//           </motion.div>
+//         </div>
+
+//         {/* Bottom Trust Badge */}
+//         <motion.div {...fadeUp(0.15)} className="text-center mt-12 pt-6 border-t border-gray-100">
+//           <p className="text-gray-400 text-sm">
+//             🏆 Trusted by parents across India – 50,000+ happy customers
+//           </p>
+//         </motion.div>
+//       </div>
+//     </section>
+//   );
+// }
+
+
 // src/components/home/BrandsNewsletter.tsx
 "use client";
 
@@ -7,7 +250,7 @@ import { motion } from "framer-motion";
 import { Mail, Send, CheckCircle, Zap, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
-// Brand logos data
+// Brand logos data (unchanged)
 const brands = [
   {
     id: 1,
@@ -47,7 +290,7 @@ const brands = [
   },
 ];
 
-// Animation variants
+// Animation variants (unchanged)
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 30 },
   whileInView: { opacity: 1, y: 0 },
@@ -68,7 +311,7 @@ const brandItemVariants = {
   visible: { opacity: 1, scale: 1, transition: { duration: 0.3 } },
 };
 
-// Newsletter Form Component
+// Newsletter Form Component (adjusted responsive classes)
 function NewsletterForm() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -80,12 +323,7 @@ function NewsletterForm() {
 
     setLoading(true);
     try {
-      // Replace with your actual API endpoint
-      // await API.post("/newsletter/subscribe", { email });
-      
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      
       setSubscribed(true);
       toast.success("Thanks for subscribing! Check your inbox for a welcome gift 🎁");
       setEmail("");
@@ -102,26 +340,26 @@ function NewsletterForm() {
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="text-center p-6 bg-green-50 rounded-2xl"
+        className="text-center p-4 sm:p-6 bg-green-50 rounded-2xl"
       >
-        <CheckCircle size={48} className="text-green-500 mx-auto mb-3" />
-        <h3 className="font-bold text-lg">You're subscribed! 🎉</h3>
-        <p className="text-sm text-gray-600 mt-1">Welcome to the Goodie Gear family!</p>
+        <CheckCircle size={40} className="text-green-500 mx-auto mb-2 sm:mb-3" />
+        <h3 className="font-bold text-base sm:text-lg">You're subscribed! 🎉</h3>
+        <p className="text-xs sm:text-sm text-gray-600 mt-1">Welcome to the Goodie Gear family!</p>
       </motion.div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
       <div className="relative">
-        <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+        <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
         <input
           type="email"
           placeholder="Enter your email address"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 outline-none transition"
+          className="w-full pl-10 sm:pl-11 pr-3 sm:pr-4 py-2.5 sm:py-3 rounded-xl border border-gray-200 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 outline-none transition text-sm sm:text-base"
         />
       </div>
       <motion.button
@@ -129,18 +367,18 @@ function NewsletterForm() {
         disabled={loading}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        className="w-full bg-linear-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md"
+        className="w-full bg-linear-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white font-bold py-2.5 sm:py-3 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md text-sm sm:text-base"
       >
         {loading ? (
-          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
         ) : (
           <>
             Subscribe Now
-            <Send size={16} />
+            <Send size={14} className="sm:w-4 sm:h-4" />
           </>
         )}
       </motion.button>
-      <p className="text-xs text-gray-400 text-center">
+      <p className="text-[10px] sm:text-xs text-gray-400 text-center">
         No spam, only awesome deals. Unsubscribe anytime.
       </p>
     </form>
@@ -150,56 +388,56 @@ function NewsletterForm() {
 // Main Component
 export default function BrandsNewsletter() {
   return (
-    <section className="bg-white py-16 md:py-20">
+    <section className="bg-white py-10 sm:py-16 md:py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <motion.div {...fadeUp(0)} className="text-center max-w-2xl mx-auto mb-12">
-          <span className="inline-flex items-center gap-2 bg-indigo-100 text-indigo-700 text-sm font-bold px-4 py-1.5 rounded-full">
+        <motion.div {...fadeUp(0)} className="text-center max-w-2xl mx-auto mb-8 sm:mb-10 md:mb-12">
+          <span className="inline-flex items-center gap-2 bg-indigo-100 text-indigo-700 text-xs sm:text-sm font-bold px-3 sm:px-4 py-1 sm:py-1.5 rounded-full">
             🤝 Trusted Partners
           </span>
-          <h2 className="text-3xl sm:text-4xl font-black mt-4 text-gray-900">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black mt-3 sm:mt-4 text-gray-900">
             Brands <span className="text-pink-600">You Love</span>
           </h2>
-          <p className="text-gray-500 mt-3">
+          <p className="text-sm sm:text-base text-gray-500 mt-2 sm:mt-3">
             We partner with the world's most beloved toy brands
           </p>
         </motion.div>
 
         {/* Two Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-10 xl:gap-16 items-start">
           {/* Left: Brands Grid */}
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={staggerContainer}
-            className="bg-gray-50 rounded-2xl p-6 shadow-sm"
+            className="bg-gray-50 rounded-2xl p-4 sm:p-6 shadow-sm"
           >
-            <h3 className="text-xl font-bold text-gray-800 mb-6 text-center">✨ Our Brand Partners</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
+            <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-800 mb-4 sm:mb-6 text-center">✨ Our Brand Partners</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
               {brands.map((brand) => (
                 <motion.a
                   key={brand.id}
                   href={brand.url}
                   variants={brandItemVariants}
                   whileHover={{ y: -5, scale: 1.05 }}
-                  className="bg-white rounded-xl p-4 flex items-center justify-center hover:shadow-md transition-all"
+                  className="bg-white rounded-xl p-3 sm:p-4 flex items-center justify-center hover:shadow-md transition-all"
                 >
-                  <div className="relative h-12 w-32">
+                  <div className="relative h-10 w-20 sm:h-12 sm:w-24 md:w-32">
                     <Image
                       src={brand.logo}
                       alt={brand.name}
                       fill
-                      sizes="128px"
+                      sizes="(max-width: 640px) 80px, (max-width: 768px) 96px, 128px"
                       className="object-contain"
                     />
                   </div>
                 </motion.a>
               ))}
             </div>
-            <div className="text-center mt-6">
-              <a href="/brands" className="inline-flex items-center gap-1 text-sm text-pink-600 hover:gap-2 transition-all font-semibold">
-                View all brands <ArrowRight size={14} />
+            <div className="text-center mt-4 sm:mt-6">
+              <a href="/brands" className="inline-flex items-center gap-1 text-xs sm:text-sm text-pink-600 hover:gap-2 transition-all font-semibold">
+                View all brands <ArrowRight size={12} className="sm:w-3.5 sm:h-3.5" />
               </a>
             </div>
           </motion.div>
@@ -207,21 +445,21 @@ export default function BrandsNewsletter() {
           {/* Right: Newsletter Signup */}
           <motion.div
             {...fadeUp(0.1)}
-            className="bg-linear-to-br from-pink-50 via-purple-50 to-indigo-50 rounded-2xl p-6 md:p-8 shadow-md border border-white"
+            className="bg-linear-to-br from-pink-50 via-purple-50 to-indigo-50 rounded-2xl p-5 sm:p-6 md:p-8 shadow-md border border-white"
           >
-            <div className="text-center mb-6">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-full shadow-md mb-4">
-                <Zap size={28} className="text-pink-600" />
+            <div className="text-center mb-4 sm:mb-6">
+              <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-white rounded-full shadow-md mb-3 sm:mb-4">
+                <Zap size={24} className="text-pink-600 sm:w-6 sm:h-6" />
               </div>
-              <h3 className="text-2xl font-black text-gray-900">
+              <h3 className="text-xl sm:text-2xl font-black text-gray-900">
                 Get 10% OFF Your First Order!
               </h3>
-              <p className="text-gray-600 mt-2 text-sm">
+              <p className="text-gray-600 mt-2 text-xs sm:text-sm">
                 Subscribe to our newsletter and receive exclusive deals, new arrivals, and a 10% discount code.
               </p>
             </div>
             <NewsletterForm />
-            <div className="flex flex-wrap justify-center gap-4 mt-6 text-xs text-gray-400">
+            <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mt-4 sm:mt-6 text-[10px] sm:text-xs text-gray-400">
               <span>✓ 10,000+ subscribers</span>
               <span>✓ Weekly deals</span>
               <span>✓ No spam</span>
@@ -230,8 +468,8 @@ export default function BrandsNewsletter() {
         </div>
 
         {/* Bottom Trust Badge */}
-        <motion.div {...fadeUp(0.15)} className="text-center mt-12 pt-6 border-t border-gray-100">
-          <p className="text-gray-400 text-sm">
+        <motion.div {...fadeUp(0.15)} className="text-center mt-8 sm:mt-10 md:mt-12 pt-4 sm:pt-6 border-t border-gray-100">
+          <p className="text-gray-400 text-xs sm:text-sm">
             🏆 Trusted by parents across India – 50,000+ happy customers
           </p>
         </motion.div>
